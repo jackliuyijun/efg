@@ -59,7 +59,7 @@
                 text="EasyFK 增量生成"
                 description="对已有项目增量生成 Entity/Mapper + 业务代码">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt O"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt z"/>
         </action>
 
         <action id="EasyFK.GenerateCode"

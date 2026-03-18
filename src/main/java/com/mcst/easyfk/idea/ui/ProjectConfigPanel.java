@@ -265,6 +265,9 @@ public class ProjectConfigPanel {
             if (moduleCheckBoxes[i].isSelected()) {
                 ModuleInfo mi = new ModuleInfo();
                 mi.setName(AVAILABLE_MODULES[i]);
+                if ("auth".equals(AVAILABLE_MODULES[i])) {
+                    mi.setPrdSplit(false);
+                }
                 modules.add(mi);
             }
         }
