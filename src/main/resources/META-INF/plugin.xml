@@ -1,0 +1,107 @@
+<idea-plugin>
+    <id>com.mcst.easyfk.generator.idea</id>
+    <name>EasyFK Generator</name>
+    <version>1.0.0</version>
+    <vendor email="jack_java@aliyun.com" url="https://easybuid.pro">MCST</vendor>
+
+    <description><![CDATA[
+        <h2>EasyFK Generator</h2>
+        <p>A powerful code generation plugin for the <b>EasyFK</b> Java/Spring Boot framework.</p>
+
+        <h3>Features</h3>
+        <ul>
+            <li><b>Full-stack Generation</b> — Generate complete project skeleton, Entity/Mapper, business code (Repository/Service/API/Controller/Remote), and Spring Boot AutoConfiguration in one click.</li>
+            <li><b>Incremental Generation</b> — Add new modules or tables to existing projects without affecting current code.</li>
+            <li><b>Model Refresh</b> — Re-generate Entity/Mapper/DTO/Param when database columns change, keeping your business logic untouched.</li>
+            <li><b>Database Import</b> — Connect to MySQL, PostgreSQL, or Oracle and import table structures automatically.</li>
+        </ul>
+
+        <h3>Supported Options</h3>
+        <ul>
+            <li><b>Project Types:</b> Single / Microservice / Smart (multi-stack microservices)</li>
+            <li><b>Build Tools:</b> Maven / Gradle (Groovy DSL &amp; Kotlin DSL)</li>
+            <li><b>ORM:</b> MyBatis / MyBatis-Flex / Hibernate</li>
+            <li><b>App Types:</b> BMS (backend management) / CLIENT (consumer-facing)</li>
+            <li><b>RPC:</b> OpenFeign / Dubbo</li>
+        </ul>
+
+        <h3>简介</h3>
+        <p>EasyFK 框架代码生成器 IDEA 插件，支持一键生成项目骨架、Entity/Mapper、业务代码、自动装配配置。</p>
+        <p>支持 Single / Microservice / Smart 三种项目架构，Maven / Gradle 构建，MyBatis / MyBatis-Flex / Hibernate ORM。</p>
+    ]]></description>
+
+    <change-notes><![CDATA[
+        <b>1.0.0</b> — Initial Release
+        <ul>
+            <li>Full-stack generation: project skeleton + Entity/Mapper + business code + AutoConfiguration</li>
+            <li>Incremental generation, model refresh, DTO/Param refresh, config-only generation</li>
+            <li>Database import from MySQL, PostgreSQL, Oracle</li>
+            <li>Single / Microservice / Smart project architectures</li>
+            <li>Maven / Gradle (Groovy DSL &amp; Kotlin DSL) build tools</li>
+            <li>MyBatis / MyBatis-Flex / Hibernate ORM support</li>
+            <li>BMS / CLIENT application type support</li>
+        </ul>
+    ]]></change-notes>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <actions>
+        <action id="EasyFK.NewProject"
+                class="com.mcst.easyfk.idea.action.NewProjectAction"
+                text="EasyFK Project"
+                description="创建 EasyFK 项目骨架并生成代码">
+            <add-to-group group-id="NewGroup" anchor="last"/>
+        </action>
+
+        <action id="EasyFK.IncrementalGenerate"
+                class="com.mcst.easyfk.idea.action.IncrementalGenerateAction"
+                text="EasyFK 增量生成"
+                description="对已有项目增量生成 Entity/Mapper + 业务代码">
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt O"/>
+        </action>
+
+        <action id="EasyFK.GenerateCode"
+                class="com.mcst.easyfk.idea.action.GenerateCodeAction"
+                text="EasyFK 生成业务代码"
+                description="生成 Repository/Service/API/Remote/Controller">
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </action>
+
+        <action id="EasyFK.RefreshModel"
+                class="com.mcst.easyfk.idea.action.RefreshModelAction"
+                text="EasyFK 刷新模型 (字段变更)"
+                description="表字段变更后重新生成 Entity/Mapper + DTO/Param，不修改业务代码">
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </action>
+
+        <action id="EasyFK.RefreshDto"
+                class="com.mcst.easyfk.idea.action.RefreshDtoAction"
+                text="EasyFK 刷新 DTO/Param"
+                description="重新生成 DTO 和 Param 类">
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </action>
+
+        <action id="EasyFK.GenerateConfig"
+                class="com.mcst.easyfk.idea.action.GenerateConfigAction"
+                text="EasyFK 生成自动装配"
+                description="生成 Spring Boot AutoConfiguration">
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </action>
+    </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable
+                instance="com.mcst.easyfk.idea.settings.EasyfkSettingsPanel"
+                id="com.mcst.easyfk.idea.settings"
+                displayName="EasyFK Generator"
+                parentId="tools"/>
+        <applicationService
+                serviceImplementation="com.mcst.easyfk.idea.settings.EasyfkSettingsState"/>
+        <toolWindow id="EasyFK"
+                    anchor="right"
+                    factoryClass="com.mcst.easyfk.idea.ui.EasyfkToolWindowFactory"
+                    icon="AllIcons.Actions.GeneratedFolder"/>
+    </extensions>
+</idea-plugin>
