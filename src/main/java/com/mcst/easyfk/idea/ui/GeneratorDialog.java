@@ -1,6 +1,5 @@
 package com.mcst.easyfk.idea.ui;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.progress.ProgressIndicator;
@@ -29,7 +28,6 @@ import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class GeneratorDialog extends DialogWrapper {
@@ -40,7 +38,6 @@ public class GeneratorDialog extends DialogWrapper {
     private final ModelConfigPanel modelConfigPanel;
     private final JTabbedPane tabbedPane;
     private final @Nullable Project ideProject;
-    private final AtomicBoolean generating = new AtomicBoolean(false);
     private final List<Action> generateActions = new ArrayList<>();
 
     public GeneratorDialog(@Nullable Project project, GenerateMode mode) {
@@ -180,13 +177,10 @@ public class GeneratorDialog extends DialogWrapper {
             EasyfkGenerator generator = new EasyfkGenerator(pp, cp);
 
             indicator.setText("步骤 1/4: 生成项目骨架...");
-            indicator.setFraction(0.0);
             generator.generateProject();
-            indicator.setFraction(0.25);
 
             indicator.setText("步骤 2/4: 生成 Entity + Mapper...");
             generator.generateModel();
-            indicator.setFraction(0.5);
 
             indicator.setText("步骤 3/4: 生成业务代码...");
             if (dtoOnly) {
@@ -194,14 +188,12 @@ public class GeneratorDialog extends DialogWrapper {
             } else {
                 generator.generateCode();
             }
-            indicator.setFraction(0.75);
 
             indicator.setText("步骤 4/4: 生成自动装配配置...");
             generator.generateConfig();
-            indicator.setFraction(1.0);
 
             refreshAndSaveConfig(pp);
-            showInfo("全部生成完成！\n路径: " + pp.getProjectDir() + File.separator + pp.getProjectName());
+            return "全部生成完成！\n路径: " + pp.getProjectDir() + File.separator + pp.getProjectName();
         });
     }
 
@@ -216,11 +208,9 @@ public class GeneratorDialog extends DialogWrapper {
         runInBackground("EasyFK 生成项目骨架...", indicator -> {
             EasyfkGenerator generator = new EasyfkGenerator(pp, cp);
             indicator.setText("生成项目骨架...");
-            indicator.setFraction(0.5);
             generator.generateProject();
-            indicator.setFraction(1.0);
             refreshAndSaveConfig(pp);
-            showInfo("项目骨架生成成功！\n路径: " + pp.getProjectDir() + File.separator + pp.getProjectName());
+            return "项目骨架生成成功！\n路径: " + pp.getProjectDir() + File.separator + pp.getProjectName();
         });
     }
 
@@ -233,11 +223,9 @@ public class GeneratorDialog extends DialogWrapper {
         runInBackground("EasyFK 生成模型...", indicator -> {
             EasyfkGenerator generator = new EasyfkGenerator(pp, cp);
             indicator.setText("生成 Entity + Mapper...");
-            indicator.setFraction(0.5);
             generator.generateModel();
-            indicator.setFraction(1.0);
             refreshAndSaveConfig(pp);
-            showInfo("Entity/Mapper 模型生成成功！");
+            return "Entity/Mapper 模型生成成功！";
         });
     }
 
@@ -253,18 +241,14 @@ public class GeneratorDialog extends DialogWrapper {
             EasyfkGenerator generator = new EasyfkGenerator(pp, cp);
             if (dtoOnly) {
                 indicator.setText("仅刷新 DTO 和 Param...");
-                indicator.setFraction(0.5);
                 generator.updateDtoAndParam();
-                indicator.setFraction(1.0);
                 refreshAndSaveConfig(pp);
-                showInfo("DTO/Param 刷新成功！");
+                return "DTO/Param 刷新成功！";
             } else {
                 indicator.setText("生成业务代码...");
-                indicator.setFraction(0.5);
                 generator.generateCode();
-                indicator.setFraction(1.0);
                 refreshAndSaveConfig(pp);
-                showInfo("业务代码生成成功！");
+                return "业务代码生成成功！";
             }
         });
     }
@@ -278,11 +262,9 @@ public class GeneratorDialog extends DialogWrapper {
         runInBackground("EasyFK 生成自动装配...", indicator -> {
             EasyfkGenerator generator = new EasyfkGenerator(pp, cp);
             indicator.setText("生成自动装配配置...");
-            indicator.setFraction(0.5);
             generator.generateConfig();
-            indicator.setFraction(1.0);
             refreshAndSaveConfig(pp);
-            showInfo("自动装配配置生成成功！");
+            return "自动装配配置生成成功！";
         });
     }
 
@@ -346,29 +328,42 @@ public class GeneratorDialog extends DialogWrapper {
 
     @FunctionalInterface
     private interface GenerateTask {
-        void run(ProgressIndicator indicator) throws Exception;
+        String run(ProgressIndicator indicator) throws Exception;
     }
 
-    private void runInBackground(String title, GenerateTask task) {
-        if (!generating.compareAndSet(false, true)) {
-            showInfo("正在生成中，请等待当前任务完成...");
-            return;
-        }
-        setGenerateActionsEnabled(false);
+    private static final long MIN_DISPLAY_MS = 2000;
 
-        ProgressManager.getInstance().run(new Task.Backgroundable(ideProject, title, true) {
+    private void runInBackground(String title, GenerateTask task) {
+        setGenerateActionsEnabled(false);
+        final String[] resultMsg = {null};
+        final String[] errorMsg = {null};
+        ProgressManager.getInstance().run(new Task.Modal(ideProject, title, true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
+                indicator.setIndeterminate(true);
+                long start = System.currentTimeMillis();
                 try {
-                    task.run(indicator);
+                    resultMsg[0] = task.run(indicator);
                 } catch (Exception ex) {
-                    showError("生成失败: " + ex.getMessage());
-                } finally {
-                    generating.set(false);
-                    ApplicationManager.getApplication().invokeLater(() -> setGenerateActionsEnabled(true));
+                    errorMsg[0] = "生成失败: " + ex.getMessage();
                 }
+                indicator.setText("正在生成中.....");
+                ensureMinDisplay(start);
             }
         });
+        setGenerateActionsEnabled(true);
+        if (errorMsg[0] != null) {
+            Messages.showErrorDialog(errorMsg[0], "EasyFK Generator");
+        } else if (resultMsg[0] != null) {
+            Messages.showInfoMessage(resultMsg[0], "EasyFK Generator");
+        }
+    }
+
+    private static void ensureMinDisplay(long stepStart) {
+        long remaining = MIN_DISPLAY_MS - (System.currentTimeMillis() - stepStart);
+        if (remaining > 0) {
+            try { Thread.sleep(remaining); } catch (InterruptedException ignored) { Thread.currentThread().interrupt(); }
+        }
     }
 
     private void setGenerateActionsEnabled(boolean enabled) {
@@ -383,16 +378,6 @@ public class GeneratorDialog extends DialogWrapper {
             IdeaFileUtil.refreshProjectDir(pp.getProjectDir(), pp.getProjectName());
         }
         saveConfigFile(pp);
-    }
-
-    private void showInfo(String msg) {
-        ApplicationManager.getApplication().invokeLater(() ->
-                Messages.showInfoMessage(msg, "EasyFK Generator"));
-    }
-
-    private void showError(String msg) {
-        ApplicationManager.getApplication().invokeLater(() ->
-                Messages.showErrorDialog(msg, "EasyFK Generator"));
     }
 
     // ============ 配置加载 ============

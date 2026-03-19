@@ -2,7 +2,7 @@
     <id>com.mcst.easyfk.generator.idea</id>
     <name>EasyFK Generator</name>
     <version>1.0.0</version>
-    <vendor email="jack_java@aliyun.com" url="https://easybuid.pro">MCST</vendor>
+    <vendor email="jack_java@aliyun.com" url="https://easybuid.pro">EasyBuild</vendor>
 
     <description><![CDATA[
         <h2>EasyFK Generator</h2>
