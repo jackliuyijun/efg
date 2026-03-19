@@ -449,10 +449,7 @@ public class GeneratorDialog extends DialogWrapper {
             CodeProperties cp = new CodeProperties();
             cp.setModuleName(cc.getModuleName());
             cp.setAuthor(cc.getAuthor());
-            OrmType codeOrm = safeEnum(OrmType.class, cc.getOrmType());
-            if (codeOrm != null) cp.setOrmType(codeOrm);
             if (cc.getSpringAnnotation() != null) cp.setSpringAnnotation(cc.getSpringAnnotation());
-            if (cc.getCreateController() != null) cp.setCreateController(cc.getCreateController());
             if (cc.getExtendsSupperClass() != null) cp.setExtendsSupperClass(cc.getExtendsSupperClass());
             if (cc.getCreateResourceAnnotation() != null) cp.setCreateResourceAnnotation(cc.getCreateResourceAnnotation());
             codeConfigPanel.loadFrom(cp);
@@ -528,9 +525,7 @@ public class GeneratorDialog extends DialogWrapper {
         GeneratorConfig.CodeConfig cc = new GeneratorConfig.CodeConfig();
         cc.setModuleName(cp.getModuleName());
         cc.setAuthor(cp.getAuthor());
-        if (cp.getOrmType() != null) cc.setOrmType(cp.getOrmType().name());
         cc.setSpringAnnotation(cp.getSpringAnnotation());
-        cc.setCreateController(cp.getCreateController());
         cc.setExtendsSupperClass(cp.getExtendsSupperClass());
         cc.setCreateResourceAnnotation(cp.getCreateResourceAnnotation());
         config.setCode(cc);

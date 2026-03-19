@@ -1,11 +1,9 @@
 package com.mcst.easyfk.idea.ui;
 
-import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.table.JBTable;
 import com.intellij.util.ui.FormBuilder;
-import com.mcst.easyfk.generator.enums.OrmType;
 import com.mcst.easyfk.generator.properties.CodeProperties;
 import com.mcst.easyfk.generator.vo.ModelInfo;
 import com.mcst.easyfk.idea.settings.EasyfkSettingsState;
@@ -24,11 +22,8 @@ public class CodeConfigPanel {
     private final JBTextField moduleNameField = new JBTextField();
     private final JBTextField authorField = new JBTextField();
 
-    private final ComboBox<OrmType> ormTypeCombo = new ComboBox<>(OrmType.values());
     private final JCheckBox springAnnotationCheck = new JCheckBox("使用 Spring 注解", true);
-    private final JCheckBox createControllerCheck = new JCheckBox("生成 Controller", true);
     private final JCheckBox extendsSupperClassCheck = new JCheckBox("继承父类", true);
-    private final JCheckBox createResourceAnnotationCheck = new JCheckBox("生成资源权限注解", false);
 
     private final DtoModelTableModel dtoModelTableModel = new DtoModelTableModel();
     private final JBTable dtoModelTable = new JBTable(dtoModelTableModel);
@@ -50,15 +45,12 @@ public class CodeConfigPanel {
     private JPanel buildCodePanel() {
         JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         optionsPanel.add(springAnnotationCheck);
-        optionsPanel.add(createControllerCheck);
         optionsPanel.add(extendsSupperClassCheck);
-        optionsPanel.add(createResourceAnnotationCheck);
 
         return FormBuilder.createFormBuilder()
                 .addLabeledComponent("模块名称 *:", moduleNameField)
                 .addLabeledComponent("作者:", authorField)
                 .addSeparator()
-                .addLabeledComponent("ORM 类型:", ormTypeCombo)
                 .addLabeledComponent("生成选项:", optionsPanel)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
@@ -112,11 +104,8 @@ public class CodeConfigPanel {
         CodeProperties cp = new CodeProperties();
         cp.setModuleName(moduleNameField.getText().trim());
         cp.setAuthor(authorField.getText().trim());
-        cp.setOrmType((OrmType) ormTypeCombo.getSelectedItem());
         cp.setSpringAnnotation(springAnnotationCheck.isSelected());
-        cp.setCreateController(createControllerCheck.isSelected());
         cp.setExtendsSupperClass(extendsSupperClassCheck.isSelected());
-        cp.setCreateResourceAnnotation(createResourceAnnotationCheck.isSelected());
         return cp;
     }
 
@@ -129,11 +118,8 @@ public class CodeConfigPanel {
         if (cp == null) return;
         if (cp.getModuleName() != null) moduleNameField.setText(cp.getModuleName());
         if (cp.getAuthor() != null) authorField.setText(cp.getAuthor());
-        if (cp.getOrmType() != null) ormTypeCombo.setSelectedItem(cp.getOrmType());
         springAnnotationCheck.setSelected(cp.getSpringAnnotation());
-        createControllerCheck.setSelected(cp.getCreateController());
         extendsSupperClassCheck.setSelected(cp.getExtendsSupperClass());
-        createResourceAnnotationCheck.setSelected(cp.getCreateResourceAnnotation());
     }
 
     public void resetToDefaults() {
@@ -144,11 +130,8 @@ public class CodeConfigPanel {
         } else {
             authorField.setText("");
         }
-        ormTypeCombo.setSelectedItem(OrmType.MYBATIS);
         springAnnotationCheck.setSelected(true);
-        createControllerCheck.setSelected(true);
         extendsSupperClassCheck.setSelected(true);
-        createResourceAnnotationCheck.setSelected(false);
         dtoModelTableModel.clear();
         codeTabbedPane.setSelectedIndex(0);
     }

@@ -340,7 +340,7 @@ public class ProjectConfigPanel {
         projectVersionField.setText("1.0.0-SNAPSHOT");
         singleRadio.setSelected(true);
         mavenRadio.setSelected(true);
-        ormTypeCombo.setSelectedItem(OrmType.MYBATIS);
+        ormTypeCombo.setSelectedItem(OrmType.NONE);
         prdTypeCombo.setSelectedItem(PrdType.SINGLE);
         bmsRadio.setSelected(true);
         logbackRadio.setSelected(true);

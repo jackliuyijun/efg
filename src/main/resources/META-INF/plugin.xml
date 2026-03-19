@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.mcst.easyfk.generator.idea</id>
     <name>EasyFK Generator</name>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <vendor email="jack_java@aliyun.com" url="https://easybuid.pro">EasyBuild</vendor>
 
     <description><![CDATA[
@@ -31,6 +31,12 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <b>1.0.1</b> — Compatibility Fix
+        <ul>
+            <li>Fix compatibility with IntelliJ IDEA 2025.2 and later versions</li>
+            <li>Upgrade IntelliJ Platform Gradle Plugin to 2.11.0</li>
+        </ul>
+
         <b>1.0.0</b> — Initial Release
         <ul>
             <li>Full-stack generation: project skeleton + Entity/Mapper + business code + AutoConfiguration</li>

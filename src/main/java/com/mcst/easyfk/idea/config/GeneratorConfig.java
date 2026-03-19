@@ -67,9 +67,7 @@ public class GeneratorConfig {
     public static class CodeConfig {
         private String moduleName;
         private String author;
-        private String ormType;
         private Boolean springAnnotation;
-        private Boolean createController;
         private Boolean extendsSupperClass;
         private Boolean createResourceAnnotation;
 
@@ -77,12 +75,8 @@ public class GeneratorConfig {
         public void setModuleName(String moduleName) { this.moduleName = moduleName; }
         public String getAuthor() { return author; }
         public void setAuthor(String author) { this.author = author; }
-        public String getOrmType() { return ormType; }
-        public void setOrmType(String ormType) { this.ormType = ormType; }
         public Boolean getSpringAnnotation() { return springAnnotation; }
         public void setSpringAnnotation(Boolean springAnnotation) { this.springAnnotation = springAnnotation; }
-        public Boolean getCreateController() { return createController; }
-        public void setCreateController(Boolean createController) { this.createController = createController; }
         public Boolean getExtendsSupperClass() { return extendsSupperClass; }
         public void setExtendsSupperClass(Boolean extendsSupperClass) { this.extendsSupperClass = extendsSupperClass; }
         public Boolean getCreateResourceAnnotation() { return createResourceAnnotation; }
