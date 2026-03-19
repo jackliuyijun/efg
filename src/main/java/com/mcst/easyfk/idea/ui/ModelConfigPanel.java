@@ -26,7 +26,7 @@ public class ModelConfigPanel {
     private final ModelTableModel tableModel;
 
     private final ComboBox<DbType> dbTypeCombo = new ComboBox<>(new DbType[]{
-            DbType.MYSQL, DbType.POSTGRE_SQL, DbType.ORACLE, DbType.ORACLE_12C
+            DbType.MYSQL, DbType.POSTGRE_SQL
     });
     private final JBTextField dbShortUrlField = new JBTextField();
     private final JBTextField dbUserField = new JBTextField("root");
@@ -219,12 +219,10 @@ public class ModelConfigPanel {
     public String buildJdbcUrl() {
         DbType dbType = (DbType) dbTypeCombo.getSelectedItem();
         String shortUrl = dbShortUrlField.getText().trim();
-        if (dbType == DbType.MYSQL) {
-            return "jdbc:mysql://" + shortUrl + "?characterEncoding=UTF-8&useSSL=false&useInformationSchema=true&remarks=true&useUnicode=true&allowPublicKeyRetrieval=true";
-        } else if (dbType == DbType.POSTGRE_SQL) {
+        if (dbType == DbType.POSTGRE_SQL) {
             return "jdbc:postgresql://" + shortUrl;
         } else {
-            return "jdbc:oracle:thin:@" + shortUrl;
+            return "jdbc:mysql://" + shortUrl + "?characterEncoding=UTF-8&useSSL=false&useInformationSchema=true&remarks=true&useUnicode=true&allowPublicKeyRetrieval=true";
         }
     }
 

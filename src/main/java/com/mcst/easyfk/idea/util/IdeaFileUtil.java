@@ -22,7 +22,6 @@ public final class IdeaFileUtil {
             String driverClass = switch (dbType) {
                 case MYSQL, MARIADB -> "com.mysql.cj.jdbc.Driver";
                 case POSTGRE_SQL -> "org.postgresql.Driver";
-                case ORACLE, ORACLE_12C -> "oracle.jdbc.OracleDriver";
                 default -> null;
             };
             if (driverClass == null) return DriverManager.getConnection(url, user, password);

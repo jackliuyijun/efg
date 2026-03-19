@@ -282,7 +282,9 @@ public class GeneratorDialog extends DialogWrapper {
             tabbedPane.setSelectedIndex(0);
             return null;
         }
-        return projectConfigPanel.toProperties();
+        ProjectProperties pp = projectConfigPanel.toProperties();
+        pp.setDbType(modelConfigPanel.getSelectedDbType());
+        return pp;
     }
 
     private @Nullable CodeProperties collectCodeProperties() {
