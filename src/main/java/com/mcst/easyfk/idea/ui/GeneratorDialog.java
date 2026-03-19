@@ -27,7 +27,9 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class GeneratorDialog extends DialogWrapper {
@@ -38,6 +40,8 @@ public class GeneratorDialog extends DialogWrapper {
     private final ModelConfigPanel modelConfigPanel;
     private final JTabbedPane tabbedPane;
     private final @Nullable Project ideProject;
+    private final AtomicBoolean generating = new AtomicBoolean(false);
+    private final List<Action> generateActions = new ArrayList<>();
 
     public GeneratorDialog(@Nullable Project project, GenerateMode mode) {
         super(project, true);
@@ -56,7 +60,6 @@ public class GeneratorDialog extends DialogWrapper {
 
         setTitle(getDialogTitle());
         setOKButtonText("关闭");
-        setCancelButtonText("取消");
         init();
     }
 
@@ -113,6 +116,11 @@ public class GeneratorDialog extends DialogWrapper {
     }
 
     @Override
+    protected Action @NotNull [] createActions() {
+        return new Action[]{getOKAction()};
+    }
+
+    @Override
     protected void doOKAction() {
         saveConfigAndSettings();
         super.doOKAction();
@@ -150,7 +158,12 @@ public class GeneratorDialog extends DialogWrapper {
                 doGenerateAll();
             }
         };
-        return new Action[]{genProjectAction, genModelAction, genCodeAction, genConfigAction, genAllAction};
+        Action[] actions = {genProjectAction, genModelAction, genCodeAction, genConfigAction, genAllAction};
+        generateActions.clear();
+        for (Action a : actions) {
+            generateActions.add(a);
+        }
+        return actions;
     }
 
     // ============ 全部生成 ============
@@ -337,6 +350,12 @@ public class GeneratorDialog extends DialogWrapper {
     }
 
     private void runInBackground(String title, GenerateTask task) {
+        if (!generating.compareAndSet(false, true)) {
+            showInfo("正在生成中，请等待当前任务完成...");
+            return;
+        }
+        setGenerateActionsEnabled(false);
+
         ProgressManager.getInstance().run(new Task.Backgroundable(ideProject, title, true) {
             @Override
             public void run(@NotNull ProgressIndicator indicator) {
@@ -344,9 +363,18 @@ public class GeneratorDialog extends DialogWrapper {
                     task.run(indicator);
                 } catch (Exception ex) {
                     showError("生成失败: " + ex.getMessage());
+                } finally {
+                    generating.set(false);
+                    ApplicationManager.getApplication().invokeLater(() -> setGenerateActionsEnabled(true));
                 }
             }
         });
+    }
+
+    private void setGenerateActionsEnabled(boolean enabled) {
+        for (Action a : generateActions) {
+            a.setEnabled(enabled);
+        }
     }
 
     private void refreshAndSaveConfig(ProjectProperties pp) {
