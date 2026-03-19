@@ -144,7 +144,52 @@ public class GeneratorDialog extends DialogWrapper {
                 doGenerateConfig();
             }
         };
-        return new Action[]{genProjectAction, genModelAction, genCodeAction, genConfigAction};
+        Action genAllAction = new AbstractAction("生成全部") {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                doGenerateAll();
+            }
+        };
+        return new Action[]{genProjectAction, genModelAction, genCodeAction, genConfigAction, genAllAction};
+    }
+
+    // ============ 全部生成 ============
+
+    private void doGenerateAll() {
+        ProjectProperties pp = collectProjectProperties();
+        if (pp == null) return;
+        CodeProperties cp = collectCodeProperties();
+        if (cp == null) return;
+
+        boolean dtoOnly = codeConfigPanel.isDtoOnly();
+
+        runInBackground("EasyFK 生成全部...", indicator -> {
+            EasyfkGenerator generator = new EasyfkGenerator(pp, cp);
+
+            indicator.setText("步骤 1/4: 生成项目骨架...");
+            indicator.setFraction(0.0);
+            generator.generateProject();
+            indicator.setFraction(0.25);
+
+            indicator.setText("步骤 2/4: 生成 Entity + Mapper...");
+            generator.generateModel();
+            indicator.setFraction(0.5);
+
+            indicator.setText("步骤 3/4: 生成业务代码...");
+            if (dtoOnly) {
+                generator.updateDtoAndParam();
+            } else {
+                generator.generateCode();
+            }
+            indicator.setFraction(0.75);
+
+            indicator.setText("步骤 4/4: 生成自动装配配置...");
+            generator.generateConfig();
+            indicator.setFraction(1.0);
+
+            refreshAndSaveConfig(pp);
+            showInfo("全部生成完成！\n路径: " + pp.getProjectDir() + File.separator + pp.getProjectName());
+        });
     }
 
     // ============ 分步生成 ============
