@@ -447,7 +447,6 @@ public class GeneratorDialog extends DialogWrapper {
             pp.setGradleType(safeEnum(GradleType.class, pc.getGradleType()));
             pp.setOrmType(safeEnum(OrmType.class, pc.getOrmType()));
             pp.setRpcType(safeEnum(RpcType.class, pc.getRpcType()));
-            pp.setServerRole(safeEnum(ServerRole.class, pc.getServerRole()));
             pp.setPrdType(safeEnum(PrdType.class, pc.getPrdType()));
             pp.setAppType(safeEnum(AppType.class, pc.getAppType()));
             pp.setLogType(safeEnum(LogType.class, pc.getLogType()));
@@ -526,7 +525,6 @@ public class GeneratorDialog extends DialogWrapper {
         if (pp.getGradleType() != null) pc.setGradleType(pp.getGradleType().name());
         if (pp.getOrmType() != null) pc.setOrmType(pp.getOrmType().name());
         if (pp.getRpcType() != null) pc.setRpcType(pp.getRpcType().name());
-        if (pp.getServerRole() != null) pc.setServerRole(pp.getServerRole().name());
         if (pp.getPrdType() != null) pc.setPrdType(pp.getPrdType().name());
         if (pp.getAppType() != null) pc.setAppType(pp.getAppType().name());
         if (pp.getLogType() != null) pc.setLogType(pp.getLogType().name());

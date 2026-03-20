@@ -36,12 +36,6 @@ public class ProjectConfigPanel {
     private final ComboBox<PrdType> prdTypeCombo = new ComboBox<>(PrdType.values());
     private final JBLabel prdTypeLabel = new JBLabel("PRD 策略:");
 
-    private final JRadioButton serverRoleServerRadio = new JRadioButton("Server (服务端)");
-    private final JRadioButton serverRolePrdRadio = new JRadioButton("PRD (表现层)");
-    private final ButtonGroup serverRoleGroup = new ButtonGroup();
-    private final JBLabel serverRoleLabel = new JBLabel("服务角色:");
-    private final JPanel serverRolePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-
     private final JRadioButton bmsRadio = new JRadioButton("BMS (后台管理端)");
     private final JRadioButton clientRadio = new JRadioButton("CLIENT (C端)");
     private final ButtonGroup appTypeGroup = new ButtonGroup();
@@ -73,12 +67,6 @@ public class ProjectConfigPanel {
         appTypeGroup.add(clientRadio);
 
         prdTypeCombo.setSelectedItem(PrdType.NONE);
-
-        serverRoleGroup.add(serverRoleServerRadio);
-        serverRoleGroup.add(serverRolePrdRadio);
-        serverRoleServerRadio.setSelected(true);
-        serverRolePanel.add(serverRoleServerRadio);
-        serverRolePanel.add(serverRolePrdRadio);
 
         logTypeGroup.add(logbackRadio);
         logTypeGroup.add(log4j2Radio);
@@ -119,7 +107,7 @@ public class ProjectConfigPanel {
         addFullWidthRow(row++, "项目类型:", projectTypePanel);
         addFullWidthRow(row++, "构建工具:", buildTypePanel);
         addThreeColumnRow(row++, "ORM 框架:", ormTypeCombo, prdTypeLabel, prdTypeCombo, rpcTypeLabel, rpcTypeCombo);
-        addTwoColumnRow(row++, serverRoleLabel, serverRolePanel, new JBLabel("应用类型 *:"), appTypePanel);
+        addFullWidthRow(row++, "应用类型 *:", appTypePanel);
         addFullWidthRow(row++, "日志框架:", logTypePanel);
 
         addSeparator(row++);
@@ -132,7 +120,6 @@ public class ProjectConfigPanel {
         mainPanel.add(Box.createVerticalGlue(), fillerGbc);
 
         updateRpcTypeVisibility();
-        updateServerRoleVisibility();
         updateAppTypeVisibility();
     }
 
@@ -227,12 +214,6 @@ public class ProjectConfigPanel {
             }
         });
 
-        rpcTypeCombo.addItemListener(e -> {
-            if (e.getStateChange() == ItemEvent.SELECTED) {
-                updateServerRoleVisibility();
-            }
-        });
-
         prdTypeCombo.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 updateAppTypeVisibility();
@@ -256,25 +237,7 @@ public class ProjectConfigPanel {
             prdTypeCombo.setSelectedItem(PrdType.NONE);
         }
 
-        updateServerRoleVisibility();
         updateAppTypeVisibility();
-    }
-
-    private void updateServerRoleVisibility() {
-        Object selectedRpc = rpcTypeCombo.getSelectedItem();
-        boolean enabled = singleRadio.isSelected()
-                && selectedRpc != null
-                && !RpcType.NONE.equals(selectedRpc);
-        serverRoleLabel.setEnabled(enabled);
-        serverRoleServerRadio.setEnabled(enabled);
-        serverRolePrdRadio.setEnabled(enabled);
-        if (enabled) {
-            if (!serverRoleServerRadio.isSelected() && !serverRolePrdRadio.isSelected()) {
-                serverRoleServerRadio.setSelected(true);
-            }
-        } else {
-            serverRoleGroup.clearSelection();
-        }
     }
 
     private void updateAppTypeVisibility() {
@@ -328,11 +291,6 @@ public class ProjectConfigPanel {
         pp.setBuildType(mavenRadio.isSelected() ? BuildType.MAVEN : BuildType.GRADLE);
         pp.setOrmType((OrmType) ormTypeCombo.getSelectedItem());
         pp.setRpcType((RpcType) rpcTypeCombo.getSelectedItem());
-        if (serverRoleServerRadio.isEnabled()) {
-            pp.setServerRole(serverRoleServerRadio.isSelected() ? ServerRole.SERVER : ServerRole.PRD);
-        } else {
-            pp.setServerRole(ServerRole.NONE);
-        }
         pp.setPrdType((PrdType) prdTypeCombo.getSelectedItem());
 
         if (bmsRadio.isEnabled()) {
@@ -377,13 +335,6 @@ public class ProjectConfigPanel {
         }
         if (pp.getOrmType() != null) ormTypeCombo.setSelectedItem(pp.getOrmType());
         if (pp.getRpcType() != null) rpcTypeCombo.setSelectedItem(pp.getRpcType());
-        if (pp.getServerRole() != null && pp.getServerRole() != ServerRole.NONE) {
-            if (pp.getServerRole() == ServerRole.PRD) serverRolePrdRadio.setSelected(true);
-            else serverRoleServerRadio.setSelected(true);
-        } else {
-            serverRoleServerRadio.setSelected(true);
-        }
-        updateServerRoleVisibility();
         if (pp.getPrdType() != null) prdTypeCombo.setSelectedItem(pp.getPrdType());
         if (pp.getAppType() != null) {
             if (pp.getAppType() == AppType.BMS) bmsRadio.setSelected(true);
@@ -412,7 +363,6 @@ public class ProjectConfigPanel {
         singleRadio.setSelected(true);
         mavenRadio.setSelected(true);
         ormTypeCombo.setSelectedItem(OrmType.NONE);
-        serverRoleServerRadio.setSelected(true);
         prdTypeCombo.setSelectedItem(PrdType.NONE);
         bmsRadio.setSelected(true);
         logbackRadio.setSelected(true);
