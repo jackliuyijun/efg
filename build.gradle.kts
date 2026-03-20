@@ -14,7 +14,7 @@ java {
 repositories {
     mavenCentral()
     maven {
-        url = uri("file:///C:/repository/maven")
+        url = uri("file:///D:/maven_repository/repository")
     }
     intellijPlatform {
         defaultRepositories()
@@ -26,7 +26,6 @@ dependencies {
         create(providers.gradleProperty("platformType").get(), providers.gradleProperty("platformVersion").get())
         pluginVerifier()
         zipSigner()
-        instrumentationTools()
     }
 
     implementation(platform("com.mcst:easyfk-dependencies:3.2.12"))

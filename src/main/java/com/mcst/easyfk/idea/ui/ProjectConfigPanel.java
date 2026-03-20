@@ -24,6 +24,7 @@ public class ProjectConfigPanel {
     private final JRadioButton singleRadio = new JRadioButton("Single (单体)");
     private final JRadioButton microserviceRadio = new JRadioButton("Microservice (微服务)");
     private final JRadioButton smartRadio = new JRadioButton("Smart (多栈微服务)");
+    private final JRadioButton microPrdRadio = new JRadioButton("Micro-PRD (微服务产品层)");
     private final ButtonGroup projectTypeGroup = new ButtonGroup();
 
     private final JRadioButton mavenRadio = new JRadioButton("Maven");
@@ -57,6 +58,7 @@ public class ProjectConfigPanel {
         projectTypeGroup.add(singleRadio);
         projectTypeGroup.add(microserviceRadio);
         projectTypeGroup.add(smartRadio);
+        projectTypeGroup.add(microPrdRadio);
         singleRadio.setSelected(true);
 
         buildTypeGroup.add(mavenRadio);
@@ -76,6 +78,7 @@ public class ProjectConfigPanel {
 
         JPanel projectTypePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
         projectTypePanel.add(singleRadio);
+        projectTypePanel.add(microPrdRadio);
         projectTypePanel.add(microserviceRadio);
         projectTypePanel.add(smartRadio);
 
@@ -213,6 +216,11 @@ public class ProjectConfigPanel {
                 updateRpcTypeVisibility();
             }
         });
+        microPrdRadio.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                updateRpcTypeVisibility();
+            }
+        });
 
         prdTypeCombo.addItemListener(e -> {
             if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -223,14 +231,22 @@ public class ProjectConfigPanel {
     }
 
     private void updateRpcTypeVisibility() {
-        boolean rpcEnabled = !smartRadio.isSelected();
+        boolean rpcEnabled = microserviceRadio.isSelected() || microPrdRadio.isSelected();
         rpcTypeLabel.setEnabled(rpcEnabled);
         rpcTypeCombo.setEnabled(rpcEnabled);
         if (!rpcEnabled) {
             rpcTypeCombo.setSelectedItem(RpcType.NONE);
+        } else if (microPrdRadio.isSelected() && RpcType.NONE.equals(rpcTypeCombo.getSelectedItem())) {
+            rpcTypeCombo.setSelectedItem(RpcType.CLOUD);
         }
 
-        boolean prdEnabled = !singleRadio.isSelected();
+        boolean ormEnabled = !microPrdRadio.isSelected();
+        ormTypeCombo.setEnabled(ormEnabled);
+        if (!ormEnabled) {
+            ormTypeCombo.setSelectedItem(OrmType.NONE);
+        }
+
+        boolean prdEnabled = !singleRadio.isSelected() && !microPrdRadio.isSelected();
         prdTypeLabel.setEnabled(prdEnabled);
         prdTypeCombo.setEnabled(prdEnabled);
         if (!prdEnabled) {
@@ -243,6 +259,7 @@ public class ProjectConfigPanel {
     private void updateAppTypeVisibility() {
         Object selectedPrd = prdTypeCombo.getSelectedItem();
         boolean enabled = singleRadio.isSelected()
+                || microPrdRadio.isSelected()
                 || PrdType.SINGLE.equals(selectedPrd);
         bmsRadio.setEnabled(enabled);
         clientRadio.setEnabled(enabled);
@@ -267,10 +284,15 @@ public class ProjectConfigPanel {
         singleRadio.addItemListener(e -> { if (e.getStateChange() == ItemEvent.SELECTED) listener.run(); });
         microserviceRadio.addItemListener(e -> { if (e.getStateChange() == ItemEvent.SELECTED) listener.run(); });
         smartRadio.addItemListener(e -> { if (e.getStateChange() == ItemEvent.SELECTED) listener.run(); });
+        microPrdRadio.addItemListener(e -> { if (e.getStateChange() == ItemEvent.SELECTED) listener.run(); });
     }
 
     public boolean isSmartProjectType() {
         return smartRadio.isSelected();
+    }
+
+    public boolean isMicroPrdProjectType() {
+        return microPrdRadio.isSelected();
     }
 
     public JPanel getPanel() {
@@ -286,6 +308,7 @@ public class ProjectConfigPanel {
 
         if (singleRadio.isSelected()) pp.setProjectType(ProjectType.SINGLE);
         else if (microserviceRadio.isSelected()) pp.setProjectType(ProjectType.MICROSERVICE);
+        else if (microPrdRadio.isSelected()) pp.setProjectType(ProjectType.MICRO_PRD);
         else pp.setProjectType(ProjectType.SMART);
 
         pp.setBuildType(mavenRadio.isSelected() ? BuildType.MAVEN : BuildType.GRADLE);
@@ -313,6 +336,7 @@ public class ProjectConfigPanel {
         if (basePackageField.getText().trim().isEmpty()) return "包根路径不能为空";
         if (projectDirField.getText().trim().isEmpty()) return "项目目录不能为空";
         if (bmsRadio.isEnabled() && !bmsRadio.isSelected() && !clientRadio.isSelected()) return "请选择应用类型";
+        if (microPrdRadio.isSelected() && RpcType.NONE.equals(rpcTypeCombo.getSelectedItem())) return "MICRO_PRD 项目必须选择 RPC 类型（CLOUD 或 DUBBO）";
         return null;
     }
 
@@ -327,6 +351,7 @@ public class ProjectConfigPanel {
                 case SINGLE -> singleRadio.setSelected(true);
                 case MICROSERVICE -> microserviceRadio.setSelected(true);
                 case SMART -> smartRadio.setSelected(true);
+                case MICRO_PRD -> microPrdRadio.setSelected(true);
             }
         }
         if (pp.getBuildType() != null) {

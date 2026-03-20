@@ -78,13 +78,23 @@ public class GeneratorDialog extends DialogWrapper {
     }
 
     private void setupProjectTypeListener() {
-        projectConfigPanel.addProjectTypeChangeListener(this::updateConfigActionEnabled);
+        projectConfigPanel.addProjectTypeChangeListener(() -> {
+            updateConfigActionEnabled();
+            updateGenerateActionsEnabled();
+        });
         updateConfigActionEnabled();
+        updateGenerateActionsEnabled();
     }
 
     private void updateConfigActionEnabled() {
         if (genConfigAction != null) {
             genConfigAction.setEnabled(projectConfigPanel.isSmartProjectType());
+        }
+    }
+
+    private void updateGenerateActionsEnabled() {
+        if (genModelAction != null) {
+            genModelAction.setEnabled(!projectConfigPanel.isMicroPrdProjectType());
         }
     }
 
@@ -189,6 +199,7 @@ public class GeneratorDialog extends DialogWrapper {
         if (cp == null) return;
 
         boolean dtoOnly = codeConfigPanel.isDtoOnly();
+        boolean isMicroPrd = ProjectType.MICRO_PRD.equals(pp.getProjectType());
 
         runInBackground("EasyFK 生成全部...", indicator -> {
             EasyfkGenerator generator = new EasyfkGenerator(pp, cp);
@@ -196,8 +207,10 @@ public class GeneratorDialog extends DialogWrapper {
             indicator.setText("步骤 1/4: 生成项目骨架...");
             generator.generateProject();
 
-            indicator.setText("步骤 2/4: 生成 Entity + Mapper...");
-            generator.generateModel();
+            if (!isMicroPrd) {
+                indicator.setText("步骤 2/4: 生成 Entity + Mapper...");
+                generator.generateModel();
+            }
 
             indicator.setText("步骤 3/4: 生成业务代码...");
             if (dtoOnly) {
@@ -206,8 +219,10 @@ public class GeneratorDialog extends DialogWrapper {
                 generator.generateCode();
             }
 
-            indicator.setText("步骤 4/4: 生成自动装配配置...");
-            generator.generateConfig();
+            if (!isMicroPrd) {
+                indicator.setText("步骤 4/4: 生成自动装配配置...");
+                generator.generateConfig();
+            }
 
             refreshAndSaveConfig(pp);
             return "全部生成完成！\n路径: " + pp.getProjectDir() + File.separator + pp.getProjectName();
@@ -386,6 +401,10 @@ public class GeneratorDialog extends DialogWrapper {
     private void setGenerateActionsEnabled(boolean enabled) {
         for (Action a : generateActions) {
             a.setEnabled(enabled);
+        }
+        if (enabled) {
+            updateGenerateActionsEnabled();
+            updateConfigActionEnabled();
         }
     }
 

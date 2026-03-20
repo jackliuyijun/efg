@@ -31,12 +31,19 @@
     ]]></description>
 
     <change-notes><![CDATA[
-        <b>1.0.2</b> — Bug Fixes &amp; Improvements
+        <b>1.0.2</b> — New Features &amp; Improvements
         <ul>
-            <li>Fix known issues with code generation and configuration handling</li>
-            <li>Optimize generation workflow for a smoother user experience</li>
-            <li>Improve UI interaction details and form validation</li>
-            <li>Enhance error messages and generation result feedback</li>
+            <li>Add "Generate All" button — one-click generation: project skeleton → Entity/Mapper → business code → AutoConfiguration with step-by-step progress (1/4, 2/4, 3/4, 4/4)</li>
+            <li>Add Micro-PRD (微服务产品层) project type support with automatic disabling of model generation and AutoConfiguration</li>
+            <li>Add Auth module option — optional checkbox to include the auth permission module in project generation</li>
+            <li>Add PRD strategy dropdown (NONE / SINGLE / SEPARATION) for Microservice and Smart project types</li>
+            <li>Add dynamic UI visibility — ORM, RPC, PRD, and App Type controls auto show/hide based on selected project type</li>
+            <li>Add configuration file management — auto-save <code>.easyfk-generator.json</code> on generation or dialog close, auto-load on dialog open, and manual load from file chooser</li>
+            <li>Add "Reset Config" button to restore all fields to defaults</li>
+            <li>Add global settings persistence — remember last used project dir, GroupId, base package, DB connection, module name across sessions</li>
+            <li>Improve form validation with specific error messages for each field and automatic tab switching to the error location</li>
+            <li>Improve progress display with modal indicator and minimum 2-second display time for better UX</li>
+            <li>Disable all generation buttons during execution to prevent duplicate runs</li>
         </ul>
 
         <b>1.0.1</b> — Compatibility Fix
@@ -48,12 +55,18 @@
         <b>1.0.0</b> — Initial Release
         <ul>
             <li>Full-stack generation: project skeleton + Entity/Mapper + business code + AutoConfiguration</li>
-            <li>Incremental generation, model refresh, DTO/Param refresh, config-only generation</li>
-            <li>Database import from MySQL, PostgreSQL, Oracle</li>
-            <li>Single / Microservice / Smart project architectures</li>
-            <li>Maven / Gradle (Groovy DSL &amp; Kotlin DSL) build tools</li>
-            <li>MyBatis / MyBatis-Flex / Hibernate ORM support</li>
-            <li>BMS / CLIENT application type support</li>
+            <li>Six generation modes: Full / Incremental / Model Refresh / Code Only / DTO Only / Config Only</li>
+            <li>Three-tab dialog: Project Config, Model Config, Code Config</li>
+            <li>EasyFK Tool Window with categorized quick-action buttons on the right sidebar</li>
+            <li>Database connection with async test and import table structures (MySQL, PostgreSQL)</li>
+            <li>Editable model table with ID type, Repository-only, and Controller generation toggles</li>
+            <li>DTO/Param refresh panel for selective domain model updates</li>
+            <li>Support Single / Microservice / Smart project architectures</li>
+            <li>Support Maven / Gradle build tools</li>
+            <li>Support MyBatis / MyBatis-Flex / Hibernate ORM frameworks</li>
+            <li>Support BMS / CLIENT application types, OpenFeign / Dubbo RPC</li>
+            <li>Support Logback / Log4j2 logging frameworks</li>
+            <li>Keyboard shortcut: Ctrl+Alt+Z for incremental generation</li>
         </ul>
     ]]></change-notes>
 
