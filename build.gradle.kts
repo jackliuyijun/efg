@@ -14,7 +14,7 @@ java {
 repositories {
     mavenCentral()
     maven {
-        url = uri("file:///D:/maven_repository/repository")
+        url = uri("file:///C:/repository/maven")
     }
     intellijPlatform {
         defaultRepositories()

@@ -1,7 +1,5 @@
 package com.mcst.easyfk.idea.config;
 
-import java.util.List;
-
 public class GeneratorConfig {
 
     private ProjectConfig project;
@@ -31,7 +29,7 @@ public class GeneratorConfig {
         private String prdType;
         private String appType;
         private String logType;
-        private List<String> modules;
+        private Boolean includeAuth;
 
         public String getProjectName() { return projectName; }
         public void setProjectName(String projectName) { this.projectName = projectName; }
@@ -63,8 +61,8 @@ public class GeneratorConfig {
         public void setAppType(String appType) { this.appType = appType; }
         public String getLogType() { return logType; }
         public void setLogType(String logType) { this.logType = logType; }
-        public List<String> getModules() { return modules; }
-        public void setModules(List<String> modules) { this.modules = modules; }
+        public Boolean getIncludeAuth() { return includeAuth; }
+        public void setIncludeAuth(Boolean includeAuth) { this.includeAuth = includeAuth; }
     }
 
     public static class CodeConfig {

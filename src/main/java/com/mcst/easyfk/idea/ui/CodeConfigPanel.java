@@ -48,10 +48,10 @@ public class CodeConfigPanel {
         optionsPanel.add(extendsSupperClassCheck);
 
         return FormBuilder.createFormBuilder()
-                .addLabeledComponent("模块名称 *:", moduleNameField)
-                .addLabeledComponent("作者:", authorField)
-                .addSeparator()
-                .addLabeledComponent("生成选项:", optionsPanel)
+                .addLabeledComponent("模块名称 *:", moduleNameField, 8, false)
+                .addLabeledComponent("作者:", authorField, 8, false)
+                .addSeparator(12)
+                .addLabeledComponent("生成选项:", optionsPanel, 8, false)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
     }
@@ -72,9 +72,10 @@ public class CodeConfigPanel {
                 })
                 .createPanel();
 
-        JPanel wrapper = new JPanel(new BorderLayout(0, 6));
+        JPanel wrapper = new JPanel(new BorderLayout(0, 12));
         JLabel hint = new JLabel("  输入需要更新的模型名称（Model Name），仅更新对应的 Dto、Param 等领域模型");
         hint.setFont(hint.getFont().deriveFont(Font.PLAIN, 12f));
+        hint.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
         wrapper.add(hint, BorderLayout.NORTH);
         wrapper.add(tablePanel, BorderLayout.CENTER);
         return wrapper;

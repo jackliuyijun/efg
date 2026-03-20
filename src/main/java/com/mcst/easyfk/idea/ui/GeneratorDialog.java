@@ -12,7 +12,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.mcst.easyfk.generator.EasyfkGenerator;
 import com.mcst.easyfk.generator.enums.*;
 import com.mcst.easyfk.generator.properties.CodeProperties;
-import com.mcst.easyfk.generator.properties.ModuleInfo;
 import com.mcst.easyfk.generator.properties.ProjectProperties;
 import com.mcst.easyfk.generator.vo.ModelInfo;
 import com.mcst.easyfk.idea.config.GeneratorConfig;
@@ -28,7 +27,6 @@ import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class GeneratorDialog extends DialogWrapper {
 
@@ -474,13 +472,8 @@ public class GeneratorDialog extends DialogWrapper {
             pp.setPrdType(safeEnum(PrdType.class, pc.getPrdType()));
             pp.setAppType(safeEnum(AppType.class, pc.getAppType()));
             pp.setLogType(safeEnum(LogType.class, pc.getLogType()));
-            if (pc.getModules() != null && !pc.getModules().isEmpty()) {
-                List<ModuleInfo> modules = pc.getModules().stream().map(name -> {
-                    ModuleInfo mi = new ModuleInfo();
-                    mi.setName(name);
-                    return mi;
-                }).collect(Collectors.toList());
-                pp.setModules(modules);
+            if (pc.getIncludeAuth() != null) {
+                pp.setIncludeAuth(pc.getIncludeAuth());
             }
             projectConfigPanel.loadFrom(pp);
         }
@@ -558,9 +551,8 @@ public class GeneratorDialog extends DialogWrapper {
         if (pp.getPrdType() != null) pc.setPrdType(pp.getPrdType().name());
         if (pp.getAppType() != null) pc.setAppType(pp.getAppType().name());
         if (pp.getLogType() != null) pc.setLogType(pp.getLogType().name());
-        if (pp.getModules() != null) {
-            pc.setModules(pp.getModules().stream()
-                    .map(ModuleInfo::getName).collect(Collectors.toList()));
+        if (pp.getIncludeAuth() != null) {
+            pc.setIncludeAuth(pp.getIncludeAuth());
         }
         config.setProject(pc);
 

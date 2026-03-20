@@ -4,19 +4,13 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.ui.components.JBLabel;
-import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.JBTextField;
 import com.mcst.easyfk.generator.enums.*;
-import com.mcst.easyfk.generator.properties.ModuleInfo;
 import com.mcst.easyfk.generator.properties.ProjectProperties;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ProjectConfigPanel {
 
@@ -56,12 +50,7 @@ public class ProjectConfigPanel {
     private final JRadioButton log4j2Radio = new JRadioButton("Log4j2");
     private final ButtonGroup logTypeGroup = new ButtonGroup();
 
-    private static final String[] AVAILABLE_MODULES = {
-            "auth", "banner", "brand", "category", "vip", "user", "dict",
-            "goods", "group", "tag", "merchant", "order", "trading",
-            "payment", "pickup", "container", "media"
-    };
-    private final JCheckBox[] moduleCheckBoxes = new JCheckBox[AVAILABLE_MODULES.length];
+    private final JCheckBox includeAuthCheckBox = new JCheckBox("引入 Auth 权限模块");
 
     private final JBTextField frameworkVersionField = new JBTextField("3.2.12");
     private final JBTextField projectVersionField = new JBTextField("1.0.0-SNAPSHOT");
@@ -91,10 +80,6 @@ public class ProjectConfigPanel {
         serverRolePanel.add(serverRoleServerRadio);
         serverRolePanel.add(serverRolePrdRadio);
 
-        for (int i = 0; i < AVAILABLE_MODULES.length; i++) {
-            moduleCheckBoxes[i] = new JCheckBox(AVAILABLE_MODULES[i]);
-        }
-
         logTypeGroup.add(logbackRadio);
         logTypeGroup.add(log4j2Radio);
         logbackRadio.setSelected(true);
@@ -118,12 +103,6 @@ public class ProjectConfigPanel {
         logTypePanel.add(logbackRadio);
         logTypePanel.add(log4j2Radio);
 
-        JPanel moduleGridPanel = new JPanel(new GridLayout(0, 3, 8, 2));
-        for (JCheckBox cb : moduleCheckBoxes) {
-            moduleGridPanel.add(cb);
-        }
-        JBScrollPane moduleScrollPane = new JBScrollPane(moduleGridPanel);
-
         mainPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(3, 4, 3, 4);
@@ -144,15 +123,7 @@ public class ProjectConfigPanel {
 
         addSeparator(row++);
 
-        gbc = new GridBagConstraints();
-        gbc.gridx = 0; gbc.gridy = row;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets = new Insets(1, 4, 1, 4);
-        mainPanel.add(new JBLabel("业务模块:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 3;
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 1.0; gbc.weighty = 1.0;
-        mainPanel.add(moduleScrollPane, gbc);
+        addFullWidthRow(row++, "权限模块:", includeAuthCheckBox);
 
         updateRpcTypeVisibility();
         updateServerRoleVisibility();
@@ -165,7 +136,7 @@ public class ProjectConfigPanel {
 
     private void addTwoColumnRow(int row, JComponent label1, JComponent comp1, JComponent label2, JComponent comp2) {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(1, 4, 1, 4);
+        gbc.insets = new Insets(5, 4, 5, 4);
         gbc.gridy = row;
         gbc.anchor = GridBagConstraints.WEST;
 
@@ -202,7 +173,7 @@ public class ProjectConfigPanel {
         panel.add(comp3, g);
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(1, 4, 1, 4);
+        gbc.insets = new Insets(5, 4, 5, 4);
         gbc.gridy = row;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.gridx = 0; gbc.gridwidth = 4; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -215,7 +186,7 @@ public class ProjectConfigPanel {
 
     private void addLabeledRow(int row, JComponent labelComp, JComponent comp) {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(1, 4, 1, 4);
+        gbc.insets = new Insets(5, 4, 5, 4);
         gbc.gridy = row;
         gbc.anchor = GridBagConstraints.WEST;
 
@@ -229,7 +200,7 @@ public class ProjectConfigPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 4;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(3, 0, 3, 0);
+        gbc.insets = new Insets(8, 0, 8, 0);
         mainPanel.add(new JSeparator(), gbc);
     }
 
@@ -367,20 +338,7 @@ public class ProjectConfigPanel {
         pp.setFrameworkVersion(frameworkVersionField.getText().trim());
         pp.setProjectVersion(projectVersionField.getText().trim());
 
-        List<ModuleInfo> modules = new ArrayList<>();
-        for (int i = 0; i < AVAILABLE_MODULES.length; i++) {
-            if (moduleCheckBoxes[i].isSelected()) {
-                ModuleInfo mi = new ModuleInfo();
-                mi.setName(AVAILABLE_MODULES[i]);
-                if ("auth".equals(AVAILABLE_MODULES[i])) {
-                    mi.setPrdSplit(false);
-                }
-                modules.add(mi);
-            }
-        }
-        if (!modules.isEmpty()) {
-            pp.setModules(modules);
-        }
+        pp.setIncludeAuth(includeAuthCheckBox.isSelected());
 
         return pp;
     }
@@ -433,12 +391,8 @@ public class ProjectConfigPanel {
         if (pp.getFrameworkVersion() != null) frameworkVersionField.setText(pp.getFrameworkVersion());
         if (pp.getProjectVersion() != null) projectVersionField.setText(pp.getProjectVersion());
 
-        if (pp.getModules() != null) {
-            Set<String> selected = pp.getModules().stream()
-                    .map(ModuleInfo::getName).collect(Collectors.toSet());
-            for (int i = 0; i < AVAILABLE_MODULES.length; i++) {
-                moduleCheckBoxes[i].setSelected(selected.contains(AVAILABLE_MODULES[i]));
-            }
+        if (pp.getIncludeAuth() != null) {
+            includeAuthCheckBox.setSelected(pp.getIncludeAuth());
         }
     }
 
@@ -456,8 +410,6 @@ public class ProjectConfigPanel {
         prdTypeCombo.setSelectedItem(PrdType.NONE);
         bmsRadio.setSelected(true);
         logbackRadio.setSelected(true);
-        for (JCheckBox cb : moduleCheckBoxes) {
-            cb.setSelected(false);
-        }
+        includeAuthCheckBox.setSelected(false);
     }
 }
