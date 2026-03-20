@@ -68,33 +68,13 @@ public class GeneratorDialog extends DialogWrapper {
         tabbedPane.addTab("代码配置", codeConfigPanel.getPanel());
 
         switch (mode) {
-            case INCREMENTAL, MODEL_REFRESH, DTO_ONLY -> tabbedPane.setSelectedIndex(1);
+            case MODEL_REFRESH, DTO_ONLY -> tabbedPane.setSelectedIndex(1);
             case CODE_ONLY -> tabbedPane.setSelectedIndex(2);
             default -> {}
         }
     }
 
     private void setupOrmTypeListener() {
-        projectConfigPanel.addOrmTypeChangeListener(e -> {
-            if (e.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
-                updateModelTabEnabled();
-            }
-        });
-        updateModelTabEnabled();
-    }
-
-    private void updateModelTabEnabled() {
-        int modelTabIndex = tabbedPane.indexOfTab("模型配置");
-        boolean enabled = projectConfigPanel.getSelectedOrmType() != OrmType.NONE;
-        if (modelTabIndex >= 0) {
-            tabbedPane.setEnabledAt(modelTabIndex, enabled);
-            if (!enabled && tabbedPane.getSelectedIndex() == modelTabIndex) {
-                tabbedPane.setSelectedIndex(0);
-            }
-        }
-        if (genModelAction != null) {
-            genModelAction.setEnabled(enabled);
-        }
     }
 
     private void setupProjectTypeListener() {
@@ -196,7 +176,6 @@ public class GeneratorDialog extends DialogWrapper {
         for (Action a : actions) {
             generateActions.add(a);
         }
-        updateModelTabEnabled();
         updateConfigActionEnabled();
         return actions;
     }

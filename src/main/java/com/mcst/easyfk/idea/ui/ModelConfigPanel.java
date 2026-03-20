@@ -82,7 +82,7 @@ public class ModelConfigPanel {
         modelPanel = buildModelPanel();
         modelPanel.setVisible(false);
 
-        JPanel modePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 6));
+        JPanel modePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
         modePanel.add(new JBLabel("创建方式:"));
         modePanel.add(fromDbRadio);
         modePanel.add(manualRadio);
@@ -93,7 +93,8 @@ public class ModelConfigPanel {
         topPanel.add(modePanel);
         topPanel.add(dbImportPanel);
 
-        mainPanel = new JPanel(new BorderLayout(0, 8));
+        mainPanel = new JPanel(new BorderLayout(0, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
         mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(modelPanel, BorderLayout.CENTER);
     }
@@ -114,7 +115,7 @@ public class ModelConfigPanel {
                 TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION));
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 4, 5, 4);
+        gbc.insets = new Insets(7, 6, 7, 6);
         gbc.anchor = GridBagConstraints.WEST;
         int row = 0;
 
@@ -148,7 +149,7 @@ public class ModelConfigPanel {
 
         gbc.gridy = row; gbc.gridx = 0; gbc.gridwidth = 4;
         gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
-        gbc.insets = new Insets(6, 4, 6, 4);
+        gbc.insets = new Insets(8, 6, 8, 6);
         panel.add(actionRow, gbc);
 
         return panel;
@@ -158,7 +159,7 @@ public class ModelConfigPanel {
         JPanel panel = new JPanel(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 4, 5, 4);
+        gbc.insets = new Insets(7, 6, 7, 6);
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridy = 0; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;

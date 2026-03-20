@@ -104,8 +104,9 @@ public class ProjectConfigPanel {
         logTypePanel.add(log4j2Radio);
 
         mainPanel = new JPanel(new GridBagLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 4, 3, 4);
+        gbc.insets = new Insets(5, 4, 5, 4);
         gbc.anchor = GridBagConstraints.WEST;
         int row = 0;
 
@@ -124,6 +125,11 @@ public class ProjectConfigPanel {
         addSeparator(row++);
 
         addFullWidthRow(row++, "权限模块:", includeAuthCheckBox);
+
+        GridBagConstraints fillerGbc = new GridBagConstraints();
+        fillerGbc.gridx = 0; fillerGbc.gridy = row; fillerGbc.gridwidth = 4;
+        fillerGbc.weighty = 1.0; fillerGbc.fill = GridBagConstraints.VERTICAL;
+        mainPanel.add(Box.createVerticalGlue(), fillerGbc);
 
         updateRpcTypeVisibility();
         updateServerRoleVisibility();

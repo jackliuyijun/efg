@@ -39,6 +39,7 @@ public class CodeConfigPanel {
         codeTabbedPane.addTab("更新领域模型", buildDtoUpdatePanel());
 
         mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
         mainPanel.add(codeTabbedPane, BorderLayout.CENTER);
     }
 
