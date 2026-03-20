@@ -492,4 +492,4 @@ A: 支持 IntelliJ IDEA 2024.3 及以上版本（包括 Community 和 Ultimate �
 
 ---
 
-*本手册基于 EasyFK Generator 插件 v1.0.0 编写。如有疑问，请联系 作者本人*
+*本手册基于 EasyFK Generator 插件 v1.0.2 编写。如有疑问，请联系 作者本人*

@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.mcst.easyfk.generator.idea</id>
     <name>EasyFK Generator</name>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <vendor email="jack_java@aliyun.com" url="https://easybuid.pro">EasyBuild</vendor>
 
     <description><![CDATA[
@@ -31,6 +31,14 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <b>1.0.2</b> — Bug Fixes &amp; Improvements
+        <ul>
+            <li>Fix known issues with code generation and configuration handling</li>
+            <li>Optimize generation workflow for a smoother user experience</li>
+            <li>Improve UI interaction details and form validation</li>
+            <li>Enhance error messages and generation result feedback</li>
+        </ul>
+
         <b>1.0.1</b> — Compatibility Fix
         <ul>
             <li>Fix compatibility with IntelliJ IDEA 2025.2 and later versions</li>
