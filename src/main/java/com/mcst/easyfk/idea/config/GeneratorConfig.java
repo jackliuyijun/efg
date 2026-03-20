@@ -27,6 +27,7 @@ public class GeneratorConfig {
         private String gradleType;
         private String ormType;
         private String rpcType;
+        private String serverRole;
         private String prdType;
         private String appType;
         private String logType;
@@ -54,6 +55,8 @@ public class GeneratorConfig {
         public void setOrmType(String ormType) { this.ormType = ormType; }
         public String getRpcType() { return rpcType; }
         public void setRpcType(String rpcType) { this.rpcType = rpcType; }
+        public String getServerRole() { return serverRole; }
+        public void setServerRole(String serverRole) { this.serverRole = serverRole; }
         public String getPrdType() { return prdType; }
         public void setPrdType(String prdType) { this.prdType = prdType; }
         public String getAppType() { return appType; }

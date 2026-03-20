@@ -39,6 +39,8 @@ public class GeneratorDialog extends DialogWrapper {
     private final JTabbedPane tabbedPane;
     private final @Nullable Project ideProject;
     private final List<Action> generateActions = new ArrayList<>();
+    private Action genModelAction;
+    private Action genConfigAction;
 
     public GeneratorDialog(@Nullable Project project, GenerateMode mode) {
         super(project, true);
@@ -54,6 +56,8 @@ public class GeneratorDialog extends DialogWrapper {
 
         setupTabs();
         loadSettings(project);
+        setupOrmTypeListener();
+        setupProjectTypeListener();
 
         setTitle(getDialogTitle());
         setOKButtonText("关闭");
@@ -69,6 +73,40 @@ public class GeneratorDialog extends DialogWrapper {
             case INCREMENTAL, MODEL_REFRESH, DTO_ONLY -> tabbedPane.setSelectedIndex(1);
             case CODE_ONLY -> tabbedPane.setSelectedIndex(2);
             default -> {}
+        }
+    }
+
+    private void setupOrmTypeListener() {
+        projectConfigPanel.addOrmTypeChangeListener(e -> {
+            if (e.getStateChange() == java.awt.event.ItemEvent.SELECTED) {
+                updateModelTabEnabled();
+            }
+        });
+        updateModelTabEnabled();
+    }
+
+    private void updateModelTabEnabled() {
+        int modelTabIndex = tabbedPane.indexOfTab("模型配置");
+        boolean enabled = projectConfigPanel.getSelectedOrmType() != OrmType.NONE;
+        if (modelTabIndex >= 0) {
+            tabbedPane.setEnabledAt(modelTabIndex, enabled);
+            if (!enabled && tabbedPane.getSelectedIndex() == modelTabIndex) {
+                tabbedPane.setSelectedIndex(0);
+            }
+        }
+        if (genModelAction != null) {
+            genModelAction.setEnabled(enabled);
+        }
+    }
+
+    private void setupProjectTypeListener() {
+        projectConfigPanel.addProjectTypeChangeListener(this::updateConfigActionEnabled);
+        updateConfigActionEnabled();
+    }
+
+    private void updateConfigActionEnabled() {
+        if (genConfigAction != null) {
+            genConfigAction.setEnabled(projectConfigPanel.isSmartProjectType());
         }
     }
 
@@ -131,7 +169,7 @@ public class GeneratorDialog extends DialogWrapper {
                 doGenerateProject();
             }
         };
-        Action genModelAction = new AbstractAction("生成模型") {
+        genModelAction = new AbstractAction("生成模型") {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
                 doGenerateModel();
@@ -143,7 +181,7 @@ public class GeneratorDialog extends DialogWrapper {
                 doGenerateCode();
             }
         };
-        Action genConfigAction = new AbstractAction("生成自动装配") {
+        genConfigAction = new AbstractAction("生成自动装配") {
             @Override
             public void actionPerformed(java.awt.event.ActionEvent e) {
                 doGenerateConfig();
@@ -160,6 +198,8 @@ public class GeneratorDialog extends DialogWrapper {
         for (Action a : actions) {
             generateActions.add(a);
         }
+        updateModelTabEnabled();
+        updateConfigActionEnabled();
         return actions;
     }
 
@@ -430,6 +470,7 @@ public class GeneratorDialog extends DialogWrapper {
             pp.setGradleType(safeEnum(GradleType.class, pc.getGradleType()));
             pp.setOrmType(safeEnum(OrmType.class, pc.getOrmType()));
             pp.setRpcType(safeEnum(RpcType.class, pc.getRpcType()));
+            pp.setServerRole(safeEnum(ServerRole.class, pc.getServerRole()));
             pp.setPrdType(safeEnum(PrdType.class, pc.getPrdType()));
             pp.setAppType(safeEnum(AppType.class, pc.getAppType()));
             pp.setLogType(safeEnum(LogType.class, pc.getLogType()));
@@ -513,6 +554,7 @@ public class GeneratorDialog extends DialogWrapper {
         if (pp.getGradleType() != null) pc.setGradleType(pp.getGradleType().name());
         if (pp.getOrmType() != null) pc.setOrmType(pp.getOrmType().name());
         if (pp.getRpcType() != null) pc.setRpcType(pp.getRpcType().name());
+        if (pp.getServerRole() != null) pc.setServerRole(pp.getServerRole().name());
         if (pp.getPrdType() != null) pc.setPrdType(pp.getPrdType().name());
         if (pp.getAppType() != null) pc.setAppType(pp.getAppType().name());
         if (pp.getLogType() != null) pc.setLogType(pp.getLogType().name());

@@ -36,16 +36,17 @@ public class ProjectConfigPanel {
     private final JRadioButton gradleRadio = new JRadioButton("Gradle");
     private final ButtonGroup buildTypeGroup = new ButtonGroup();
 
-    private final JRadioButton groovyRadio = new JRadioButton("Groovy");
-    private final JRadioButton kotlinRadio = new JRadioButton("Kotlin");
-    private final ButtonGroup gradleTypeGroup = new ButtonGroup();
-    private final JPanel gradleTypePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-    private final JBLabel gradleTypeLabel = new JBLabel("Gradle DSL:");
-
     private final ComboBox<OrmType> ormTypeCombo = new ComboBox<>(OrmType.values());
     private final ComboBox<RpcType> rpcTypeCombo = new ComboBox<>(RpcType.values());
     private final JBLabel rpcTypeLabel = new JBLabel("RPC 类型:");
     private final ComboBox<PrdType> prdTypeCombo = new ComboBox<>(PrdType.values());
+    private final JBLabel prdTypeLabel = new JBLabel("PRD 策略:");
+
+    private final JRadioButton serverRoleServerRadio = new JRadioButton("Server (服务端)");
+    private final JRadioButton serverRolePrdRadio = new JRadioButton("PRD (表现层)");
+    private final ButtonGroup serverRoleGroup = new ButtonGroup();
+    private final JBLabel serverRoleLabel = new JBLabel("服务角色:");
+    private final JPanel serverRolePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
     private final JRadioButton bmsRadio = new JRadioButton("BMS (后台管理端)");
     private final JRadioButton clientRadio = new JRadioButton("CLIENT (C端)");
@@ -79,16 +80,16 @@ public class ProjectConfigPanel {
         buildTypeGroup.add(gradleRadio);
         mavenRadio.setSelected(true);
 
-        gradleTypeGroup.add(groovyRadio);
-        gradleTypeGroup.add(kotlinRadio);
-        groovyRadio.setSelected(true);
-        gradleTypePanel.add(groovyRadio);
-        gradleTypePanel.add(kotlinRadio);
-
         appTypeGroup.add(bmsRadio);
         appTypeGroup.add(clientRadio);
 
-        prdTypeCombo.setSelectedItem(PrdType.SINGLE);
+        prdTypeCombo.setSelectedItem(PrdType.NONE);
+
+        serverRoleGroup.add(serverRoleServerRadio);
+        serverRoleGroup.add(serverRolePrdRadio);
+        serverRoleServerRadio.setSelected(true);
+        serverRolePanel.add(serverRoleServerRadio);
+        serverRolePanel.add(serverRolePrdRadio);
 
         for (int i = 0; i < AVAILABLE_MODULES.length; i++) {
             moduleCheckBoxes[i] = new JCheckBox(AVAILABLE_MODULES[i]);
@@ -137,10 +138,8 @@ public class ProjectConfigPanel {
 
         addFullWidthRow(row++, "项目类型:", projectTypePanel);
         addFullWidthRow(row++, "构建工具:", buildTypePanel);
-        addLabeledRow(row, gradleTypeLabel, gradleTypePanel); row++;
-        addTwoColumnRow(row++, "ORM 框架:", ormTypeCombo, "PRD 策略:", prdTypeCombo);
-        addLabeledRow(row, rpcTypeLabel, rpcTypeCombo); row++;
-        addFullWidthRow(row++, "应用类型 *:", appTypePanel);
+        addThreeColumnRow(row++, "ORM 框架:", ormTypeCombo, prdTypeLabel, prdTypeCombo, rpcTypeLabel, rpcTypeCombo);
+        addTwoColumnRow(row++, serverRoleLabel, serverRolePanel, new JBLabel("应用类型 *:"), appTypePanel);
         addFullWidthRow(row++, "日志框架:", logTypePanel);
 
         addSeparator(row++);
@@ -148,31 +147,66 @@ public class ProjectConfigPanel {
         gbc = new GridBagConstraints();
         gbc.gridx = 0; gbc.gridy = row;
         gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.insets = new Insets(3, 4, 3, 4);
+        gbc.insets = new Insets(1, 4, 1, 4);
         mainPanel.add(new JBLabel("业务模块:"), gbc);
         gbc.gridx = 1; gbc.gridwidth = 3;
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1.0; gbc.weighty = 1.0;
         mainPanel.add(moduleScrollPane, gbc);
 
-        updateGradleTypeVisibility();
         updateRpcTypeVisibility();
+        updateServerRoleVisibility();
+        updateAppTypeVisibility();
     }
 
     private void addTwoColumnRow(int row, String label1, JComponent comp1, String label2, JComponent comp2) {
+        addTwoColumnRow(row, new JBLabel(label1), comp1, new JBLabel(label2), comp2);
+    }
+
+    private void addTwoColumnRow(int row, JComponent label1, JComponent comp1, JComponent label2, JComponent comp2) {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 4, 3, 4);
+        gbc.insets = new Insets(1, 4, 1, 4);
         gbc.gridy = row;
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
-        mainPanel.add(new JBLabel(label1), gbc);
+        mainPanel.add(label1, gbc);
         gbc.gridx = 1; gbc.weightx = 0.5; gbc.fill = GridBagConstraints.HORIZONTAL;
         mainPanel.add(comp1, gbc);
         gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
-        mainPanel.add(new JBLabel(label2), gbc);
+        mainPanel.add(label2, gbc);
         gbc.gridx = 3; gbc.weightx = 0.5; gbc.fill = GridBagConstraints.HORIZONTAL;
         mainPanel.add(comp2, gbc);
+    }
+
+    private void addThreeColumnRow(int row, String label1, JComponent comp1,
+                                    JComponent label2, JComponent comp2,
+                                    JComponent label3, JComponent comp3) {
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints g = new GridBagConstraints();
+        g.insets = new Insets(0, 0, 0, 8);
+        g.anchor = GridBagConstraints.WEST;
+        g.gridy = 0;
+
+        g.gridx = 0; g.weightx = 0; g.fill = GridBagConstraints.NONE;
+        panel.add(new JBLabel(label1), g);
+        g.gridx = 1; g.weightx = 0.34; g.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(comp1, g);
+        g.gridx = 2; g.weightx = 0; g.fill = GridBagConstraints.NONE;
+        panel.add(label2, g);
+        g.gridx = 3; g.weightx = 0.33; g.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(comp2, g);
+        g.gridx = 4; g.weightx = 0; g.fill = GridBagConstraints.NONE; g.insets = new Insets(0, 0, 0, 8);
+        panel.add(label3, g);
+        g.gridx = 5; g.weightx = 0.33; g.fill = GridBagConstraints.HORIZONTAL; g.insets = new Insets(0, 0, 0, 0);
+        panel.add(comp3, g);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(1, 4, 1, 4);
+        gbc.gridy = row;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.gridx = 0; gbc.gridwidth = 4; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
+        mainPanel.add(panel, gbc);
     }
 
     private void addFullWidthRow(int row, String label, JComponent comp) {
@@ -181,7 +215,7 @@ public class ProjectConfigPanel {
 
     private void addLabeledRow(int row, JComponent labelComp, JComponent comp) {
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(3, 4, 3, 4);
+        gbc.insets = new Insets(1, 4, 1, 4);
         gbc.gridy = row;
         gbc.anchor = GridBagConstraints.WEST;
 
@@ -195,7 +229,7 @@ public class ProjectConfigPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 4;
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(6, 0, 6, 0);
+        gbc.insets = new Insets(3, 0, 3, 0);
         mainPanel.add(new JSeparator(), gbc);
     }
 
@@ -216,20 +250,87 @@ public class ProjectConfigPanel {
             }
         });
 
-        mavenRadio.addItemListener(e -> updateGradleTypeVisibility());
-        gradleRadio.addItemListener(e -> updateGradleTypeVisibility());
+        rpcTypeCombo.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                updateServerRoleVisibility();
+            }
+        });
+
+        prdTypeCombo.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                updateAppTypeVisibility();
+            }
+        });
+
     }
 
     private void updateRpcTypeVisibility() {
-        boolean show = !singleRadio.isSelected();
-        rpcTypeLabel.setVisible(show);
-        rpcTypeCombo.setVisible(show);
+        boolean rpcEnabled = !smartRadio.isSelected();
+        rpcTypeLabel.setEnabled(rpcEnabled);
+        rpcTypeCombo.setEnabled(rpcEnabled);
+        if (!rpcEnabled) {
+            rpcTypeCombo.setSelectedItem(RpcType.NONE);
+        }
+
+        boolean prdEnabled = !singleRadio.isSelected();
+        prdTypeLabel.setEnabled(prdEnabled);
+        prdTypeCombo.setEnabled(prdEnabled);
+        if (!prdEnabled) {
+            prdTypeCombo.setSelectedItem(PrdType.NONE);
+        }
+
+        updateServerRoleVisibility();
+        updateAppTypeVisibility();
     }
 
-    private void updateGradleTypeVisibility() {
-        boolean show = gradleRadio.isSelected();
-        gradleTypeLabel.setVisible(show);
-        gradleTypePanel.setVisible(show);
+    private void updateServerRoleVisibility() {
+        Object selectedRpc = rpcTypeCombo.getSelectedItem();
+        boolean enabled = singleRadio.isSelected()
+                && selectedRpc != null
+                && !RpcType.NONE.equals(selectedRpc);
+        serverRoleLabel.setEnabled(enabled);
+        serverRoleServerRadio.setEnabled(enabled);
+        serverRolePrdRadio.setEnabled(enabled);
+        if (enabled) {
+            if (!serverRoleServerRadio.isSelected() && !serverRolePrdRadio.isSelected()) {
+                serverRoleServerRadio.setSelected(true);
+            }
+        } else {
+            serverRoleGroup.clearSelection();
+        }
+    }
+
+    private void updateAppTypeVisibility() {
+        Object selectedPrd = prdTypeCombo.getSelectedItem();
+        boolean enabled = singleRadio.isSelected()
+                || PrdType.SINGLE.equals(selectedPrd);
+        bmsRadio.setEnabled(enabled);
+        clientRadio.setEnabled(enabled);
+        if (enabled) {
+            if (!bmsRadio.isSelected() && !clientRadio.isSelected()) {
+                bmsRadio.setSelected(true);
+            }
+        } else {
+            appTypeGroup.clearSelection();
+        }
+    }
+
+    public void addOrmTypeChangeListener(java.awt.event.ItemListener listener) {
+        ormTypeCombo.addItemListener(listener);
+    }
+
+    public OrmType getSelectedOrmType() {
+        return (OrmType) ormTypeCombo.getSelectedItem();
+    }
+
+    public void addProjectTypeChangeListener(Runnable listener) {
+        singleRadio.addItemListener(e -> { if (e.getStateChange() == ItemEvent.SELECTED) listener.run(); });
+        microserviceRadio.addItemListener(e -> { if (e.getStateChange() == ItemEvent.SELECTED) listener.run(); });
+        smartRadio.addItemListener(e -> { if (e.getStateChange() == ItemEvent.SELECTED) listener.run(); });
+    }
+
+    public boolean isSmartProjectType() {
+        return smartRadio.isSelected();
     }
 
     public JPanel getPanel() {
@@ -248,13 +349,19 @@ public class ProjectConfigPanel {
         else pp.setProjectType(ProjectType.SMART);
 
         pp.setBuildType(mavenRadio.isSelected() ? BuildType.MAVEN : BuildType.GRADLE);
-        pp.setGradleType(groovyRadio.isSelected() ? GradleType.GROOVY : GradleType.KOTLIN);
         pp.setOrmType((OrmType) ormTypeCombo.getSelectedItem());
         pp.setRpcType((RpcType) rpcTypeCombo.getSelectedItem());
+        if (serverRoleServerRadio.isEnabled()) {
+            pp.setServerRole(serverRoleServerRadio.isSelected() ? ServerRole.SERVER : ServerRole.PRD);
+        } else {
+            pp.setServerRole(ServerRole.NONE);
+        }
         pp.setPrdType((PrdType) prdTypeCombo.getSelectedItem());
 
-        if (bmsRadio.isSelected()) pp.setAppType(AppType.BMS);
-        else if (clientRadio.isSelected()) pp.setAppType(AppType.CLIENT);
+        if (bmsRadio.isEnabled()) {
+            if (bmsRadio.isSelected()) pp.setAppType(AppType.BMS);
+            else if (clientRadio.isSelected()) pp.setAppType(AppType.CLIENT);
+        }
 
         pp.setLogType(logbackRadio.isSelected() ? LogType.LOGBACK : LogType.LOG4J2);
         pp.setFrameworkVersion(frameworkVersionField.getText().trim());
@@ -283,7 +390,7 @@ public class ProjectConfigPanel {
         if (groupIdField.getText().trim().isEmpty()) return "GroupId 不能为空";
         if (basePackageField.getText().trim().isEmpty()) return "包根路径不能为空";
         if (projectDirField.getText().trim().isEmpty()) return "项目目录不能为空";
-        if (!bmsRadio.isSelected() && !clientRadio.isSelected()) return "请选择应用类型";
+        if (bmsRadio.isEnabled() && !bmsRadio.isSelected() && !clientRadio.isSelected()) return "请选择应用类型";
         return null;
     }
 
@@ -304,17 +411,21 @@ public class ProjectConfigPanel {
             if (pp.getBuildType() == BuildType.MAVEN) mavenRadio.setSelected(true);
             else gradleRadio.setSelected(true);
         }
-        if (pp.getGradleType() != null) {
-            if (pp.getGradleType() == GradleType.GROOVY) groovyRadio.setSelected(true);
-            else kotlinRadio.setSelected(true);
-        }
         if (pp.getOrmType() != null) ormTypeCombo.setSelectedItem(pp.getOrmType());
         if (pp.getRpcType() != null) rpcTypeCombo.setSelectedItem(pp.getRpcType());
+        if (pp.getServerRole() != null && pp.getServerRole() != ServerRole.NONE) {
+            if (pp.getServerRole() == ServerRole.PRD) serverRolePrdRadio.setSelected(true);
+            else serverRoleServerRadio.setSelected(true);
+        } else {
+            serverRoleServerRadio.setSelected(true);
+        }
+        updateServerRoleVisibility();
         if (pp.getPrdType() != null) prdTypeCombo.setSelectedItem(pp.getPrdType());
         if (pp.getAppType() != null) {
             if (pp.getAppType() == AppType.BMS) bmsRadio.setSelected(true);
             else clientRadio.setSelected(true);
         }
+        updateAppTypeVisibility();
         if (pp.getLogType() != null) {
             if (pp.getLogType() == LogType.LOGBACK) logbackRadio.setSelected(true);
             else log4j2Radio.setSelected(true);
@@ -341,7 +452,8 @@ public class ProjectConfigPanel {
         singleRadio.setSelected(true);
         mavenRadio.setSelected(true);
         ormTypeCombo.setSelectedItem(OrmType.NONE);
-        prdTypeCombo.setSelectedItem(PrdType.SINGLE);
+        serverRoleServerRadio.setSelected(true);
+        prdTypeCombo.setSelectedItem(PrdType.NONE);
         bmsRadio.setSelected(true);
         logbackRadio.setSelected(true);
         for (JCheckBox cb : moduleCheckBoxes) {

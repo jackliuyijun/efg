@@ -38,7 +38,8 @@ public class ModelConfigPanel {
 
     private final JRadioButton fromDbRadio = new JRadioButton("从数据库导入", true);
     private final JRadioButton manualRadio = new JRadioButton("手动创建模型");
-    private JPanel dbPanel;
+    private JPanel dbConnPanel;
+    private JPanel dbImportPanel;
     private JPanel modelPanel;
 
     private Project project;
@@ -76,18 +77,21 @@ public class ModelConfigPanel {
         fromDbRadio.addActionListener(e -> switchMode(true));
         manualRadio.addActionListener(e -> switchMode(false));
 
+        dbConnPanel = buildDbConnPanel();
+        dbImportPanel = buildDbImportPanel();
+        modelPanel = buildModelPanel();
+        modelPanel.setVisible(false);
+
         JPanel modePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 2));
         modePanel.add(new JBLabel("创建方式:"));
         modePanel.add(fromDbRadio);
         modePanel.add(manualRadio);
 
-        dbPanel = buildDbPanel();
-        modelPanel = buildModelPanel();
-        modelPanel.setVisible(false);
-
-        JPanel topPanel = new JPanel(new BorderLayout(0, 4));
-        topPanel.add(modePanel, BorderLayout.NORTH);
-        topPanel.add(dbPanel, BorderLayout.CENTER);
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.add(dbConnPanel);
+        topPanel.add(modePanel);
+        topPanel.add(dbImportPanel);
 
         mainPanel = new JPanel(new BorderLayout(0, 6));
         mainPanel.add(topPanel, BorderLayout.NORTH);
@@ -95,7 +99,7 @@ public class ModelConfigPanel {
     }
 
     private void switchMode(boolean isDbMode) {
-        dbPanel.setVisible(isDbMode);
+        dbImportPanel.setVisible(isDbMode);
         modelPanel.setVisible(!isDbMode);
     }
 
@@ -103,10 +107,10 @@ public class ModelConfigPanel {
         return fromDbRadio.isSelected();
     }
 
-    private JPanel buildDbPanel() {
-        JPanel dbPanel = new JPanel(new GridBagLayout());
-        dbPanel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(), "数据库连接（从数据库导入表）",
+    private JPanel buildDbConnPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createEtchedBorder(), "数据库连接",
                 TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION));
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -115,38 +119,27 @@ public class ModelConfigPanel {
         int row = 0;
 
         gbc.gridy = row; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
-        dbPanel.add(new JBLabel("数据库类型:"), gbc);
-        gbc.gridx = 1; gbc.weightx = 0.5; gbc.fill = GridBagConstraints.HORIZONTAL;
-        dbPanel.add(dbTypeCombo, gbc);
-        gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
-        dbPanel.add(new JBLabel("表前缀:"), gbc);
-        gbc.gridx = 3; gbc.weightx = 0.5; gbc.fill = GridBagConstraints.HORIZONTAL;
-        dbPanel.add(tablePrefixField, gbc);
-        row++;
-
-        gbc.gridy = row; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
-        dbPanel.add(new JBLabel("连接地址:"), gbc);
+        panel.add(new JBLabel("数据库类型:"), gbc);
         gbc.gridx = 1; gbc.gridwidth = 3; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
-        dbPanel.add(dbShortUrlField, gbc);
+        panel.add(dbTypeCombo, gbc);
         gbc.gridwidth = 1;
         row++;
 
         gbc.gridy = row; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
-        dbPanel.add(new JBLabel("用户名:"), gbc);
-        gbc.gridx = 1; gbc.weightx = 0.5; gbc.fill = GridBagConstraints.HORIZONTAL;
-        dbPanel.add(dbUserField, gbc);
-        gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
-        dbPanel.add(new JBLabel("密码:"), gbc);
-        gbc.gridx = 3; gbc.weightx = 0.5; gbc.fill = GridBagConstraints.HORIZONTAL;
-        dbPanel.add(dbPwdField, gbc);
+        panel.add(new JBLabel("连接地址:"), gbc);
+        gbc.gridx = 1; gbc.gridwidth = 3; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(dbShortUrlField, gbc);
+        gbc.gridwidth = 1;
         row++;
 
         gbc.gridy = row; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
-        gbc.insets = new Insets(2, 4, 2, 4);
-        dbPanel.add(new JBLabel("指定表名:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 3; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
-        dbPanel.add(fromDbTablesField, gbc);
-        gbc.gridwidth = 1;
+        panel.add(new JBLabel("用户名:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 0.5; gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(dbUserField, gbc);
+        gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        panel.add(new JBLabel("密码:"), gbc);
+        gbc.gridx = 3; gbc.weightx = 0.5; gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(dbPwdField, gbc);
         row++;
 
         JPanel actionRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
@@ -156,9 +149,29 @@ public class ModelConfigPanel {
         gbc.gridy = row; gbc.gridx = 0; gbc.gridwidth = 4;
         gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
         gbc.insets = new Insets(4, 4, 4, 4);
-        dbPanel.add(actionRow, gbc);
+        panel.add(actionRow, gbc);
 
-        return dbPanel;
+        return panel;
+    }
+
+    private JPanel buildDbImportPanel() {
+        JPanel panel = new JPanel(new GridBagLayout());
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(2, 4, 2, 4);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        gbc.gridy = 0; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        panel.add(new JBLabel("表前缀:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(tablePrefixField, gbc);
+
+        gbc.gridy = 1; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        panel.add(new JBLabel("指定表名:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(fromDbTablesField, gbc);
+
+        return panel;
     }
 
     private JPanel buildModelPanel() {
