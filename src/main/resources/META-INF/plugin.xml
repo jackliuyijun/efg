@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.mcst.easyfk.generator.idea</id>
     <name>EasyFK Generator</name>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <vendor email="jack_java@aliyun.com" url="https://easybuid.pro">EasyBuild</vendor>
 
     <description><![CDATA[
@@ -31,6 +31,14 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <b>1.0.3</b> — Bug Fixes
+        <ul>
+            <li>Fix CLI mode ignoring <code>app-type</code> config — CliConfigLoader now correctly parses the app-type field from YAML</li>
+            <li>Fix FreeMarker template error in ModelGenerator — add missing <code>ormType</code> variable to mapper.java.ftl template context</li>
+            <li>Fix incorrect ORM artifact naming — split <code>ormModuleSuffix</code> into framework suffix (orm-mybatis) and business suffix (auth-orm-plus)</li>
+            <li>Add Micro-PRD project type to generator-template.yml comments</li>
+        </ul>
+
         <b>1.0.2</b> — New Features &amp; Improvements
         <ul>
             <li>Add "Generate All" button — one-click generation: project skeleton → Entity/Mapper → business code → AutoConfiguration with step-by-step progress (1/4, 2/4, 3/4, 4/4)</li>
