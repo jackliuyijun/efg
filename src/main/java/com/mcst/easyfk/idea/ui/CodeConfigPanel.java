@@ -48,13 +48,15 @@ public class CodeConfigPanel {
         optionsPanel.add(springAnnotationCheck);
         optionsPanel.add(extendsSupperClassCheck);
 
-        return FormBuilder.createFormBuilder()
+        JPanel formPanel = FormBuilder.createFormBuilder()
                 .addLabeledComponent("模块名称 *:", moduleNameField, 8, false)
                 .addLabeledComponent("作者:", authorField, 8, false)
                 .addSeparator(12)
                 .addLabeledComponent("生成选项:", optionsPanel, 8, false)
                 .addComponentFillVertically(new JPanel(), 0)
                 .getPanel();
+        formPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        return formPanel;
     }
 
     private JPanel buildDtoUpdatePanel() {

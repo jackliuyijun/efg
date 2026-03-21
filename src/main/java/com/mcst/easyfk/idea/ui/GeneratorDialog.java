@@ -347,7 +347,7 @@ public class GeneratorDialog extends DialogWrapper {
             if (!dtoModelList.isEmpty()) {
                 cp.setModelList(dtoModelList);
             }
-        } else if (!modelConfigPanel.isFromDbMode()) {
+        } else {
             List<ModelInfo> modelList = modelConfigPanel.getModelList();
             if (!modelList.isEmpty()) {
                 cp.setModelList(modelList);

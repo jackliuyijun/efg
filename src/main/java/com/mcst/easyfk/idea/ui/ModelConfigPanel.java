@@ -35,8 +35,6 @@ public class ModelConfigPanel {
     private final JBTextField tablePrefixField = new JBTextField();
     private final JBTextField fromDbTablesField = new JBTextField();
 
-    private final JRadioButton fromDbRadio = new JRadioButton("从数据库导入", true);
-    private final JRadioButton manualRadio = new JRadioButton("手动创建模型");
     private JPanel dbConnPanel;
     private JPanel dbImportPanel;
     private JPanel modelPanel;
@@ -70,41 +68,18 @@ public class ModelConfigPanel {
         table.getColumnModel().getColumn(4).setPreferredWidth(90);
         table.getColumnModel().getColumn(5).setPreferredWidth(100);
 
-        ButtonGroup modeGroup = new ButtonGroup();
-        modeGroup.add(fromDbRadio);
-        modeGroup.add(manualRadio);
-        fromDbRadio.addActionListener(e -> switchMode(true));
-        manualRadio.addActionListener(e -> switchMode(false));
-
         dbConnPanel = buildDbConnPanel();
         dbImportPanel = buildDbImportPanel();
         modelPanel = buildModelPanel();
-        modelPanel.setVisible(false);
 
-        JPanel modePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 8));
-        modePanel.add(new JBLabel("创建方式:"));
-        modePanel.add(fromDbRadio);
-        modePanel.add(manualRadio);
+        JTabbedPane modeTabbedPane = new JTabbedPane();
+        modeTabbedPane.addTab("从数据库导入", dbImportPanel);
+        modeTabbedPane.addTab("手动创建模型", modelPanel);
 
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-        topPanel.add(dbConnPanel);
-        topPanel.add(modePanel);
-        topPanel.add(dbImportPanel);
-
-        mainPanel = new JPanel(new BorderLayout(0, 10));
+        mainPanel = new JPanel(new BorderLayout(0, 4));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
-        mainPanel.add(topPanel, BorderLayout.NORTH);
-        mainPanel.add(modelPanel, BorderLayout.CENTER);
-    }
-
-    private void switchMode(boolean isDbMode) {
-        dbImportPanel.setVisible(isDbMode);
-        modelPanel.setVisible(!isDbMode);
-    }
-
-    public boolean isFromDbMode() {
-        return fromDbRadio.isSelected();
+        mainPanel.add(dbConnPanel, BorderLayout.NORTH);
+        mainPanel.add(modeTabbedPane, BorderLayout.CENTER);
     }
 
     private JPanel buildDbConnPanel() {
@@ -160,15 +135,22 @@ public class ModelConfigPanel {
 
         gbc.gridy = 0; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
         panel.add(new JBLabel("表前缀:"), gbc);
+        JPanel prefixRow = new JPanel(new BorderLayout(6, 0));
+        prefixRow.add(tablePrefixField, BorderLayout.CENTER);
+        JButton clearTablesBtn = new JButton("清空表名");
+        clearTablesBtn.addActionListener(e -> fromDbTablesField.setText(""));
+        prefixRow.add(clearTablesBtn, BorderLayout.EAST);
         gbc.gridx = 1; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(tablePrefixField, gbc);
+        panel.add(prefixRow, gbc);
 
         gbc.gridy = 1; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
         panel.add(new JBLabel("指定表名:"), gbc);
         gbc.gridx = 1; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
         panel.add(fromDbTablesField, gbc);
 
-        return panel;
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.add(panel, BorderLayout.NORTH);
+        return wrapper;
     }
 
     private JPanel buildModelPanel() {

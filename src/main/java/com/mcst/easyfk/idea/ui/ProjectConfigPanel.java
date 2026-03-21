@@ -21,10 +21,10 @@ public class ProjectConfigPanel {
     private final JBTextField basePackageField = new JBTextField();
     private final TextFieldWithBrowseButton projectDirField = new TextFieldWithBrowseButton();
 
-    private final JRadioButton singleRadio = new JRadioButton("Single (单体)");
-    private final JRadioButton microserviceRadio = new JRadioButton("Microservice (微服务)");
-    private final JRadioButton smartRadio = new JRadioButton("Smart (多栈微服务)");
-    private final JRadioButton microPrdRadio = new JRadioButton("Micro-PRD (微服务产品层)");
+    private final JRadioButton singleRadio = new JRadioButton("Single (单体项目)");
+    private final JRadioButton microserviceRadio = new JRadioButton("Microservice (微服务项目)");
+    private final JRadioButton smartRadio = new JRadioButton("Smart (智能型项目)");
+    private final JRadioButton microPrdRadio = new JRadioButton("Micro-PRD (产品层项目)");
     private final ButtonGroup projectTypeGroup = new ButtonGroup();
 
     private final JRadioButton mavenRadio = new JRadioButton("Maven");
