@@ -11,7 +11,6 @@ import com.mcst.easyfk.generator.vo.ModelInfo;
 import com.mcst.easyfk.idea.util.IdeaFileUtil;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
@@ -121,8 +120,14 @@ public class ModelConfigPanel {
 
         gbc.gridy = row; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
         panel.add(new JBLabel("数据库类型:"), gbc);
+        JPanel dbTypeRow = new JPanel(new BorderLayout(6, 0));
+        dbTypeRow.add(dbTypeCombo, BorderLayout.CENTER);
+        JPanel testConnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        testConnPanel.add(testConnBtn);
+        testConnPanel.add(testResultLabel);
+        dbTypeRow.add(testConnPanel, BorderLayout.EAST);
         gbc.gridx = 1; gbc.gridwidth = 3; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(dbTypeCombo, gbc);
+        panel.add(dbTypeRow, gbc);
         gbc.gridwidth = 1;
         row++;
 
@@ -142,15 +147,6 @@ public class ModelConfigPanel {
         gbc.gridx = 3; gbc.weightx = 0.5; gbc.fill = GridBagConstraints.HORIZONTAL;
         panel.add(dbPwdField, gbc);
         row++;
-
-        JPanel actionRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
-        actionRow.add(testConnBtn);
-        actionRow.add(testResultLabel);
-
-        gbc.gridy = row; gbc.gridx = 0; gbc.gridwidth = 4;
-        gbc.fill = GridBagConstraints.HORIZONTAL; gbc.weightx = 1.0;
-        gbc.insets = new Insets(8, 6, 8, 6);
-        panel.add(actionRow, gbc);
 
         return panel;
     }
@@ -181,13 +177,7 @@ public class ModelConfigPanel {
                 .setRemoveAction(button -> removeSelectedRows())
                 .createPanel();
 
-        JPanel wrapper = new JPanel(new BorderLayout(0, 4));
-        JBLabel hint = new JBLabel("  模型列表");
-        hint.setFont(hint.getFont().deriveFont(Font.BOLD, 12f));
-        hint.setBorder(new EmptyBorder(4, 0, 2, 0));
-        wrapper.add(hint, BorderLayout.NORTH);
-        wrapper.add(tablePanel, BorderLayout.CENTER);
-        return wrapper;
+        return tablePanel;
     }
 
     private void testConnection() {
