@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.mcst.easyfk.generator.idea</id>
     <name>EasyFK Generator</name>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <vendor email="jack_java@aliyun.com" url="https://easybuid.pro">EasyBuild</vendor>
 
     <description><![CDATA[
@@ -31,6 +31,16 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <b>1.0.4</b> — UI Improvements
+        <ul>
+            <li>Rename project types: Micro-PRD → 产品层项目, Microservice → 微服务项目, Smart → 智能型项目, Single → 单体项目</li>
+            <li>Model Config: move "测试连接" button to the right side of database type selector for compact layout</li>
+            <li>Model Config: replace radio buttons with tabbed pane — "从数据库导入" and "手动创建模型" now coexist as separate tabs, both data sources are merged by the generator engine</li>
+            <li>Model Config: add "清空表名" button next to table prefix field for quick clearing</li>
+            <li>Model Config: remove redundant "模型列表" title to save vertical space</li>
+            <li>Code Config: add top padding to "生成业务代码" tab for better spacing</li>
+        </ul>
+
         <b>1.0.3</b> — Bug Fixes
         <ul>
             <li>Fix CLI mode ignoring <code>app-type</code> config — CliConfigLoader now correctly parses the app-type field from YAML</li>
