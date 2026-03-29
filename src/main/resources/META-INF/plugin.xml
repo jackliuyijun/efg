@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.mcst.easyfk.generator.idea</id>
     <name>EasyFK Generator</name>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <vendor email="jack_java@aliyun.com" url="https://easybuid.pro">EasyBuild</vendor>
 
     <description><![CDATA[
@@ -31,14 +31,23 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <b>1.0.6</b> — Generation Stability &amp; UI Fixes
+        <ul>
+            <li>Fix model generation error reporting in the IDEA plugin: generation failures are now surfaced to the dialog instead of being reported as success</li>
+            <li>Fix App Type enable/required rules: it is now required for <code>Single</code>, <code>Micro-PRD</code>, and <code>PRD strategy = SINGLE</code></li>
+            <li>Fix test profile database type configuration for PostgreSQL-based generator verification</li>
+            <li>Replace inline label messages with dialog popups — database connection test results, table import status, and all other notifications are now shown as modal dialogs to prevent layout disruption</li>
+            <li>Remove <code>testResultLabel</code> from Model Config to fix layout overflow caused by long error messages displayed next to the "测试连接" button</li>
+            <li>Remove <code>statusLabel</code> from Database Table Import dialog — success/failure feedback is now delivered via popup dialogs</li>
+        </ul>
+
         <b>1.0.5</b> — Database Import & Config Fixes
         <ul>
             <li>Rename generator config key from <code>from-db-tables</code> to <code>db-tables</code> and align plugin behavior with the latest generator engine</li>
             <li>Complete the "Import Tables from Database" workflow in Model Config, writing selected tables into <code>db-tables</code> instead of mixing them into manual <code>model-list</code></li>
             <li>Persist and restore both <code>db-tables</code> and manual <code>model-list</code> in <code>.easyfk-generator.json</code></li>
             <li>Add model configuration validation to detect duplicate Model names before generation, and block generation when <code>db-tables</code> and <code>model-list</code> are both empty</li>
-            <li>Adjust App Type visibility and validation: it is now only enabled when PRD strategy is <code>SINGLE</code></li>
-            <li>Lower the minimum supported IntelliJ IDEA version to 2024.2 while keeping Java 21 compatibility</li>
+            <li>Improve App Type visibility and validation logic in project configuration</li>
             <li>Build the plugin against the local generator source to ensure the bundled plugin uses the latest generator fixes</li>
         </ul>
 

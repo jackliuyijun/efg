@@ -35,7 +35,6 @@ public class ModelConfigPanel {
     private final JBTextField dbUserField = new JBTextField("root");
     private final JPasswordField dbPwdField = new JPasswordField();
     private final JButton testConnBtn = new JButton("测试连接");
-    private final JBLabel testResultLabel = new JBLabel("");
     private final JBTextField tablePrefixField = new JBTextField();
     private final JBTextField dbTablesField = new JBTextField();
 
@@ -103,7 +102,6 @@ public class ModelConfigPanel {
         dbTypeRow.add(dbTypeCombo, BorderLayout.CENTER);
         JPanel testConnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         testConnPanel.add(testConnBtn);
-        testConnPanel.add(testResultLabel);
         dbTypeRow.add(testConnPanel, BorderLayout.EAST);
         gbc.gridx = 1; gbc.gridwidth = 3; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
         panel.add(dbTypeRow, gbc);
@@ -172,8 +170,8 @@ public class ModelConfigPanel {
     }
 
     private void testConnection() {
-        testResultLabel.setText("连接中...");
-        testResultLabel.setForeground(Color.GRAY);
+        testConnBtn.setEnabled(false);
+        testConnBtn.setText("连接中...");
 
         SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
             private String errorMsg;
@@ -194,17 +192,16 @@ public class ModelConfigPanel {
 
             @Override
             protected void done() {
+                testConnBtn.setText("测试连接");
+                testConnBtn.setEnabled(true);
                 try {
                     if (get()) {
-                        testResultLabel.setText("连接成功");
-                        testResultLabel.setForeground(new Color(0, 128, 0));
+                        Messages.showInfoMessage("数据库连接成功", "测试连接");
                     } else {
-                        testResultLabel.setText("连接失败: " + errorMsg);
-                        testResultLabel.setForeground(Color.RED);
+                        Messages.showErrorDialog("连接失败: " + errorMsg, "测试连接");
                     }
                 } catch (Exception ex) {
-                    testResultLabel.setText("连接失败");
-                    testResultLabel.setForeground(Color.RED);
+                    Messages.showErrorDialog("连接失败: " + ex.getMessage(), "测试连接");
                 }
             }
         };

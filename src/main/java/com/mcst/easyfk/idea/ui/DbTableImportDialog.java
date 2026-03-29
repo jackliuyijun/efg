@@ -26,7 +26,6 @@ public class DbTableImportDialog extends DialogWrapper {
     private final JBTextField tablePrefixField;
     private final List<ModelInfo> selectedModels = new ArrayList<>();
 
-    private final JBLabel statusLabel = new JBLabel("正在加载表列表...");
     private final String jdbcUrl;
     private final String dbUser;
     private final String dbPwd;
@@ -68,7 +67,6 @@ public class DbTableImportDialog extends DialogWrapper {
 
         panel.add(topPanel, BorderLayout.NORTH);
         panel.add(new JScrollPane(table), BorderLayout.CENTER);
-        panel.add(statusLabel, BorderLayout.SOUTH);
 
         panel.setPreferredSize(new Dimension(550, 400));
         return panel;
@@ -97,9 +95,8 @@ public class DbTableImportDialog extends DialogWrapper {
                 try {
                     List<String[]> tables = get();
                     tableModel.setData(tables);
-                    statusLabel.setText("共加载 " + tables.size() + " 张表");
+                    Messages.showInfoMessage("共加载 " + tables.size() + " 张表", "加载完成");
                 } catch (Exception ex) {
-                    statusLabel.setText("加载失败");
                     Messages.showErrorDialog("加载表列表失败: " + ex.getMessage(), "错误");
                 }
             }
