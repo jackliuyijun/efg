@@ -1,5 +1,9 @@
 package com.mcst.easyfk.idea.config;
 
+import com.mcst.easyfk.generator.vo.ModelInfo;
+
+import java.util.List;
+
 public class GeneratorConfig {
 
     private ProjectConfig project;
@@ -68,6 +72,7 @@ public class GeneratorConfig {
         private Boolean springAnnotation;
         private Boolean extendsSupperClass;
         private Boolean createResourceAnnotation;
+        private List<ModelInfo> modelList;
 
         public String getModuleName() { return moduleName; }
         public void setModuleName(String moduleName) { this.moduleName = moduleName; }
@@ -79,6 +84,8 @@ public class GeneratorConfig {
         public void setExtendsSupperClass(Boolean extendsSupperClass) { this.extendsSupperClass = extendsSupperClass; }
         public Boolean getCreateResourceAnnotation() { return createResourceAnnotation; }
         public void setCreateResourceAnnotation(Boolean createResourceAnnotation) { this.createResourceAnnotation = createResourceAnnotation; }
+        public List<ModelInfo> getModelList() { return modelList; }
+        public void setModelList(List<ModelInfo> modelList) { this.modelList = modelList; }
     }
 
     public static class DbConfig {
@@ -86,6 +93,7 @@ public class GeneratorConfig {
         private String dbShortUrl;
         private String dbUser;
         private String tablePrefix;
+        private String dbTables;
 
         public String getDbType() { return dbType; }
         public void setDbType(String dbType) { this.dbType = dbType; }
@@ -95,5 +103,7 @@ public class GeneratorConfig {
         public void setDbUser(String dbUser) { this.dbUser = dbUser; }
         public String getTablePrefix() { return tablePrefix; }
         public void setTablePrefix(String tablePrefix) { this.tablePrefix = tablePrefix; }
+        public String getDbTables() { return dbTables; }
+        public void setDbTables(String dbTables) { this.dbTables = dbTables; }
     }
 }

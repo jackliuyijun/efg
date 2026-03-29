@@ -180,7 +180,7 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
 | ORM 框架 | **MYBATIS** / **MYBATIS_FLEX** / **HIBERNATE** | 数据库访问框架 |
 | RPC 类型 | 可选的远程调用类型 | 仅在 Microservice / Smart 类型时显示 |
 | PRD 策略 | **SINGLE** 等 | 部署策略 |
-| 应用类型 * | **BMS**（后台管理端） / **CLIENT**（C端） | 必须选择 |
+| 应用类型 * | **BMS**（后台管理端） / **CLIENT**（C端） | 当项目类型为 **Single** / **Micro-PRD**，或 PRD 策略为 **SINGLE** 时必须选择 |
 | 日志框架 | **Logback** / **Log4j2** | 日志实现 |
 
 **业务模块**
@@ -368,7 +368,7 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
    - 查看数据库中所有表的列表（含表名和备注）
    - 可修改"表前缀"用于自动去除前缀并生成 Model 名称
    - 勾选需要导入的表
-3. 点击 **"导入选中"**，选中的表将添加到模型列表
+3. 点击 **"导入选中"**，选中的表将写入 `db-tables` 列表，用于后续从数据库读取字段信息
 
 > **表前缀处理示例**: 若表前缀为 `t_`，表名 `t_user_order` 将自动生成 Model 名称 `UserOrder`。
 
@@ -399,17 +399,22 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
   "code": {
     "moduleName": "user",
     "author": "eb-jack",
-    "ormType": "MYBATIS",
     "springAnnotation": true,
-    "createController": true,
     "extendsSupperClass": true,
-    "createResourceAnnotation": false
+    "createResourceAnnotation": false,
+    "modelList": [
+      {
+        "modelName": "CustomManualModel",
+        "modelDesc": "手动模型"
+      }
+    ]
   },
   "db": {
     "dbType": "MYSQL",
     "dbShortUrl": "localhost:3306/my_database",
     "dbUser": "root",
-    "tablePrefix": "t_"
+    "tablePrefix": "t_",
+    "dbTables": "t_user,t_order"
   }
 }
 ```

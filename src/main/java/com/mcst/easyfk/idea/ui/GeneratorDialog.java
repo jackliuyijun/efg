@@ -195,10 +195,10 @@ public class GeneratorDialog extends DialogWrapper {
     private void doGenerateAll() {
         ProjectProperties pp = collectProjectProperties();
         if (pp == null) return;
+        boolean dtoOnly = codeConfigPanel.isDtoOnly();
+        if (!dtoOnly && !validateModelConfig(true)) return;
         CodeProperties cp = collectCodeProperties();
         if (cp == null) return;
-
-        boolean dtoOnly = codeConfigPanel.isDtoOnly();
         boolean isMicroPrd = ProjectType.MICRO_PRD.equals(pp.getProjectType());
 
         runInBackground("EasyFK 生成全部...", indicator -> {
@@ -249,6 +249,7 @@ public class GeneratorDialog extends DialogWrapper {
     private void doGenerateModel() {
         ProjectProperties pp = collectProjectProperties();
         if (pp == null) return;
+        if (!validateModelConfig(true)) return;
         CodeProperties cp = collectCodeProperties(false);
         if (cp == null) return;
 
@@ -264,10 +265,10 @@ public class GeneratorDialog extends DialogWrapper {
     private void doGenerateCode() {
         ProjectProperties pp = collectProjectProperties();
         if (pp == null) return;
+        boolean dtoOnly = codeConfigPanel.isDtoOnly();
+        if (!dtoOnly && !validateModelConfig(true)) return;
         CodeProperties cp = collectCodeProperties();
         if (cp == null) return;
-
-        boolean dtoOnly = codeConfigPanel.isDtoOnly();
 
         runInBackground("EasyFK 生成业务代码...", indicator -> {
             EasyfkGenerator generator = new EasyfkGenerator(pp, cp);
@@ -337,9 +338,9 @@ public class GeneratorDialog extends DialogWrapper {
         cp.setDbUser(modelConfigPanel.getDbUser());
         cp.setDbPwd(modelConfigPanel.getDbPwd());
         cp.setTablePrefix(modelConfigPanel.getTablePrefix());
-        String fromDbTables = modelConfigPanel.getFromDbTables();
-        if (!fromDbTables.isEmpty()) {
-            cp.setFromDbTables(fromDbTables);
+        String dbTables = modelConfigPanel.getDbTables();
+        if (!dbTables.isEmpty()) {
+            cp.setDbTables(dbTables);
         }
 
         if (codeConfigPanel.isDtoOnly()) {
@@ -354,6 +355,19 @@ public class GeneratorDialog extends DialogWrapper {
             }
         }
         return cp;
+    }
+
+    private boolean validateModelConfig(boolean requireModelSource) {
+        int modelTabIndex = tabbedPane.indexOfTab("模型配置");
+        String modelError = modelConfigPanel.validateInput(requireModelSource);
+        if (modelError != null) {
+            Messages.showErrorDialog(modelError, "模型配置校验失败");
+            if (modelTabIndex >= 0) {
+                tabbedPane.setSelectedIndex(modelTabIndex);
+            }
+            return false;
+        }
+        return true;
     }
 
     // ============ 后台执行 ============
@@ -484,11 +498,13 @@ public class GeneratorDialog extends DialogWrapper {
             if (cc.getExtendsSupperClass() != null) cp.setExtendsSupperClass(cc.getExtendsSupperClass());
             if (cc.getCreateResourceAnnotation() != null) cp.setCreateResourceAnnotation(cc.getCreateResourceAnnotation());
             codeConfigPanel.loadFrom(cp);
+            modelConfigPanel.setModelList(cc.getModelList());
         }
 
         if (config.getDb() != null) {
             GeneratorConfig.DbConfig dc = config.getDb();
             modelConfigPanel.loadDbSettings(dc.getDbShortUrl(), dc.getDbUser(), dc.getTablePrefix());
+            modelConfigPanel.setDbTables(dc.getDbTables());
             DbType dbType = safeEnum(DbType.class, dc.getDbType());
             if (dbType != null) modelConfigPanel.setDbType(dbType);
         }
@@ -558,6 +574,7 @@ public class GeneratorDialog extends DialogWrapper {
         cc.setSpringAnnotation(cp.getSpringAnnotation());
         cc.setExtendsSupperClass(cp.getExtendsSupperClass());
         cc.setCreateResourceAnnotation(cp.getCreateResourceAnnotation());
+        cc.setModelList(modelConfigPanel.getModelList());
         config.setCode(cc);
 
         GeneratorConfig.DbConfig dc = new GeneratorConfig.DbConfig();
@@ -565,6 +582,7 @@ public class GeneratorDialog extends DialogWrapper {
         dc.setDbShortUrl(modelConfigPanel.getDbShortUrl());
         dc.setDbUser(modelConfigPanel.getDbUser());
         dc.setTablePrefix(modelConfigPanel.getTablePrefix());
+        dc.setDbTables(modelConfigPanel.getDbTables());
         config.setDb(dc);
 
         GeneratorConfigUtil.save(fullProjectPath, config);

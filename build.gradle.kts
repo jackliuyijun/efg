@@ -7,8 +7,9 @@ group = providers.gradleProperty("pluginGroup").get()
 version = providers.gradleProperty("pluginVersion").get()
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    val targetJava = JavaVersion.toVersion(providers.gradleProperty("javaVersion").get())
+    sourceCompatibility = targetJava
+    targetCompatibility = targetJava
 }
 
 repositories {
@@ -53,7 +54,7 @@ intellijPlatform {
         name = providers.gradleProperty("pluginName")
         version = providers.gradleProperty("pluginVersion")
         ideaVersion {
-            sinceBuild = "243"
+            sinceBuild = "242"
             untilBuild = provider { null }
         }
     }

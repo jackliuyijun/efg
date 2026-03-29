@@ -2,10 +2,12 @@ package com.mcst.easyfk.idea.ui;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.table.JBTable;
+import com.mcst.easyfk.core.utils.common.StringUtil;
 import com.mcst.easyfk.generator.enums.DbType;
 import com.mcst.easyfk.generator.vo.ModelInfo;
 import com.mcst.easyfk.idea.util.IdeaFileUtil;
@@ -15,8 +17,10 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.sql.Connection;
+import java.util.LinkedHashSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ModelConfigPanel {
 
@@ -33,7 +37,7 @@ public class ModelConfigPanel {
     private final JButton testConnBtn = new JButton("测试连接");
     private final JBLabel testResultLabel = new JBLabel("");
     private final JBTextField tablePrefixField = new JBTextField();
-    private final JBTextField fromDbTablesField = new JBTextField();
+    private final JBTextField dbTablesField = new JBTextField();
 
     private JPanel dbConnPanel;
     private JPanel dbImportPanel;
@@ -47,7 +51,7 @@ public class ModelConfigPanel {
 
     public ModelConfigPanel() {
         dbShortUrlField.getEmptyText().setText("localhost:3306/my_database");
-        fromDbTablesField.getEmptyText().setText("留空则导入时显示全部表，多个用逗号分隔");
+        dbTablesField.getEmptyText().setText("留空则导入时显示全部表，多个用逗号分隔");
         testConnBtn.addActionListener(e -> testConnection());
 
         tableModel = new ModelTableModel();
@@ -138,15 +142,20 @@ public class ModelConfigPanel {
         JPanel prefixRow = new JPanel(new BorderLayout(6, 0));
         prefixRow.add(tablePrefixField, BorderLayout.CENTER);
         JButton clearTablesBtn = new JButton("清空表名");
-        clearTablesBtn.addActionListener(e -> fromDbTablesField.setText(""));
+        clearTablesBtn.addActionListener(e -> dbTablesField.setText(""));
         prefixRow.add(clearTablesBtn, BorderLayout.EAST);
         gbc.gridx = 1; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
         panel.add(prefixRow, gbc);
 
         gbc.gridy = 1; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
         panel.add(new JBLabel("指定表名:"), gbc);
+        JButton importTablesBtn = new JButton("从数据库导入表...");
+        importTablesBtn.addActionListener(e -> importTablesFromDb());
+        JPanel tableRow = new JPanel(new BorderLayout(6, 0));
+        tableRow.add(dbTablesField, BorderLayout.CENTER);
+        tableRow.add(importTablesBtn, BorderLayout.EAST);
         gbc.gridx = 1; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(fromDbTablesField, gbc);
+        panel.add(tableRow, gbc);
 
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.add(panel, BorderLayout.NORTH);
@@ -237,6 +246,10 @@ public class ModelConfigPanel {
         }
     }
 
+    public void setModelList(List<ModelInfo> models) {
+        tableModel.setData(models);
+    }
+
     public List<ModelInfo> getModelList() {
         return tableModel.getData();
     }
@@ -265,8 +278,12 @@ public class ModelConfigPanel {
         return tablePrefixField.getText().trim();
     }
 
-    public String getFromDbTables() {
-        return fromDbTablesField.getText().trim();
+    public String getDbTables() {
+        return dbTablesField.getText().trim();
+    }
+
+    public void setDbTables(String dbTables) {
+        dbTablesField.setText(dbTables != null ? dbTables : "");
     }
 
     public void loadDbSettings(String dbShortUrl, String dbUser, String tablePrefix) {
@@ -285,7 +302,108 @@ public class ModelConfigPanel {
         dbUserField.setText("root");
         dbPwdField.setText("");
         tablePrefixField.setText("");
-        fromDbTablesField.setText("");
+        dbTablesField.setText("");
+        tableModel.clear();
+    }
+
+    public String validateInput() {
+        return validateInput(false);
+    }
+
+    public String validateInput(boolean requireModelSource) {
+        String dbTables = getDbTables();
+        if (!dbTables.isEmpty()) {
+            if (getDbShortUrl().isEmpty()) {
+                return "使用 db-tables 时，数据库连接地址不能为空";
+            }
+            if (getDbPwd().isEmpty()) {
+                return "使用 db-tables 时，数据库密码不能为空";
+            }
+        }
+        List<ModelInfo> modelList = getModelList();
+        if (requireModelSource && dbTables.isEmpty() && modelList.isEmpty()) {
+            return "db-tables 和模型列表不能同时为空";
+        }
+        Set<String> modelNames = new LinkedHashSet<>();
+        List<String> tables = parseDbTables(dbTables);
+        for (String table : tables) {
+            String modelName = buildModelName(table);
+            if (!modelNames.add(modelName)) {
+                return "Model 名称重复: " + modelName;
+            }
+        }
+        for (int i = 0; i < modelList.size(); i++) {
+            ModelInfo modelInfo = modelList.get(i);
+            String modelName = modelInfo.getModelName() != null ? modelInfo.getModelName().trim() : "";
+            if (modelName.isEmpty()) {
+                return "手动模型第 " + (i + 1) + " 行的 Model 名称不能为空";
+            }
+            if (!modelNames.add(modelName)) {
+                return "Model 名称重复: " + modelName;
+            }
+        }
+        return null;
+    }
+
+    private void importTablesFromDb() {
+        String error = validateDbImportSettings();
+        if (error != null) {
+            Messages.showErrorDialog(error, "数据库配置校验失败");
+            return;
+        }
+        DbTableImportDialog dialog = new DbTableImportDialog(project, buildJdbcUrl(), getDbUser(), getDbPwd(),
+                getSelectedDbType(), getTablePrefix());
+        if (!dialog.showAndGet()) {
+            return;
+        }
+        tablePrefixField.setText(dialog.getTablePrefix());
+        List<ModelInfo> selectedModels = dialog.getSelectedModels();
+        if (selectedModels.isEmpty()) {
+            return;
+        }
+        LinkedHashSet<String> dbTableSet = new LinkedHashSet<>(parseDbTables(getDbTables()));
+        for (ModelInfo modelInfo : selectedModels) {
+            if (modelInfo.getTableName() != null && !modelInfo.getTableName().isBlank()) {
+                dbTableSet.add(modelInfo.getTableName());
+            }
+        }
+        dbTablesField.setText(String.join(",", dbTableSet));
+    }
+
+    private String validateDbImportSettings() {
+        if (getDbShortUrl().isEmpty()) {
+            return "数据库连接地址不能为空";
+        }
+        if (getDbPwd().isEmpty()) {
+            return "数据库密码不能为空";
+        }
+        return null;
+    }
+
+    private List<String> parseDbTables(String dbTables) {
+        List<String> tables = new ArrayList<>();
+        if (dbTables == null || dbTables.isBlank()) {
+            return tables;
+        }
+        for (String table : dbTables.split(",")) {
+            String value = table.trim();
+            if (!value.isEmpty()) {
+                tables.add(value);
+            }
+        }
+        return tables;
+    }
+
+    private String buildModelName(String tableName) {
+        String modelName = tableName;
+        String prefix = getTablePrefix();
+        if (!prefix.isEmpty() && modelName.startsWith(prefix)) {
+            modelName = modelName.substring(prefix.length());
+            if (modelName.startsWith("_")) {
+                modelName = modelName.substring(1);
+            }
+        }
+        return StringUtil.upperFirstChar(StringUtil.underlineToCamel(modelName));
     }
 
     private static class ModelTableModel extends AbstractTableModel {
@@ -294,6 +412,14 @@ public class ModelConfigPanel {
         public void addRow(ModelInfo info) {
             data.add(info);
             fireTableRowsInserted(data.size() - 1, data.size() - 1);
+        }
+
+        public void setData(List<ModelInfo> models) {
+            data.clear();
+            if (models != null) {
+                data.addAll(models);
+            }
+            fireTableDataChanged();
         }
 
         public void removeRow(int row) {
@@ -305,6 +431,15 @@ public class ModelConfigPanel {
 
         public List<ModelInfo> getData() {
             return new ArrayList<>(data);
+        }
+
+        public void clear() {
+            if (data.isEmpty()) {
+                return;
+            }
+            int last = data.size() - 1;
+            data.clear();
+            fireTableRowsDeleted(0, last);
         }
 
         @Override

@@ -138,6 +138,10 @@ public class DbTableImportDialog extends DialogWrapper {
         return selectedModels;
     }
 
+    public String getTablePrefix() {
+        return tablePrefixField.getText().trim();
+    }
+
     private static class TableListModel extends AbstractTableModel {
         private final List<String[]> data = new ArrayList<>();
         private final List<Boolean> selected = new ArrayList<>();
