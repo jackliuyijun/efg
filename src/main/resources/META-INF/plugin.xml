@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.mcst.easyfk.generator.idea</id>
     <name>EasyFK Generator</name>
-    <version>1.0.5</version>
+    <version>1.0.6</version>
     <vendor email="jack_java@aliyun.com" url="https://easybuid.pro">EasyBuild</vendor>
 
     <description><![CDATA[
@@ -31,6 +31,15 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <b>1.0.6</b> — 项目配置体验优化与 Dubbo 提供者配置调整
+        <ul>
+            <li>项目配置页将“项目类型”改为下拉选择，便于后续继续扩展更多项目类型</li>
+            <li>调整项目类型下拉顺序为：单体项目、产品层项目、微服务项目、智能型项目</li>
+            <li>将“项目类型”和“构建工具”调整到同一行显示，并适当增大表单行间距，提升界面紧凑度与可读性</li>
+            <li>当 ORM、RPC、PRD 选择为 <code>NONE</code> 时，不再写入接口参数与插件配置，避免无效参数传递</li>
+            <li>更新 Dubbo Provider 配置模板，改为生成 <code>ServiceConfig&lt;IxxxRemote&gt;</code> Bean，并显式执行 <code>setInterface</code>、<code>setRef</code>、<code>export</code></li>
+        </ul>
+
         <b>1.0.5</b> — Database Import, Config Fixes &amp; UI Improvements
         <ul>
             <li>Rename generator config key from <code>from-db-tables</code> to <code>db-tables</code> and align plugin behavior with the latest generator engine</li>

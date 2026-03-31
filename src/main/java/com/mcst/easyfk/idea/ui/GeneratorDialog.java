@@ -558,9 +558,9 @@ public class GeneratorDialog extends DialogWrapper {
         if (pp.getProjectType() != null) pc.setProjectType(pp.getProjectType().name());
         if (pp.getBuildType() != null) pc.setBuildType(pp.getBuildType().name());
         if (pp.getGradleType() != null) pc.setGradleType(pp.getGradleType().name());
-        if (pp.getOrmType() != null) pc.setOrmType(pp.getOrmType().name());
-        if (pp.getRpcType() != null) pc.setRpcType(pp.getRpcType().name());
-        if (pp.getPrdType() != null) pc.setPrdType(pp.getPrdType().name());
+        if (pp.getOrmType() != null && pp.getOrmType() != OrmType.NONE) pc.setOrmType(pp.getOrmType().name());
+        if (pp.getRpcType() != null && pp.getRpcType() != RpcType.NONE) pc.setRpcType(pp.getRpcType().name());
+        if (pp.getPrdType() != null && pp.getPrdType() != PrdType.NONE) pc.setPrdType(pp.getPrdType().name());
         if (pp.getAppType() != null) pc.setAppType(pp.getAppType().name());
         if (pp.getLogType() != null) pc.setLogType(pp.getLogType().name());
         if (pp.getIncludeAuth() != null) {
