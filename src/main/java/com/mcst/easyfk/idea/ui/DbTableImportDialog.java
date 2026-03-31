@@ -7,9 +7,8 @@ import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.table.JBTable;
 import com.mcst.easyfk.generator.enums.DbType;
+import com.mcst.easyfk.generator.util.GeneratorUtil;
 import com.mcst.easyfk.generator.vo.ModelInfo;
-
-import com.mcst.easyfk.core.utils.common.StringUtil;
 import com.mcst.easyfk.idea.util.IdeaFileUtil;
 
 import javax.swing.*;
@@ -39,8 +38,8 @@ public class DbTableImportDialog extends DialogWrapper {
         this.dbPwd = dbPwd;
         this.dbType = dbType;
 
-        setTitle("从数据库导入表");
-        setOKButtonText("导入选中");
+        setTitle("选择数据库表");
+        setOKButtonText("确认选择");
         setCancelButtonText("取消");
 
         tableModel = new TableListModel();
@@ -51,6 +50,7 @@ public class DbTableImportDialog extends DialogWrapper {
         table.getColumnModel().getColumn(2).setPreferredWidth(250);
 
         tablePrefixField = new JBTextField(tablePrefix != null ? tablePrefix : "");
+        tablePrefixField.getEmptyText().setText("多个前缀用英文逗号隔开");
 
         init();
         loadTables();
@@ -61,7 +61,7 @@ public class DbTableImportDialog extends DialogWrapper {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
 
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
-        topPanel.add(new JBLabel("表前缀 (自动去除):"));
+        topPanel.add(new JBLabel("忽略表前缀:"));
         topPanel.add(tablePrefixField);
         tablePrefixField.setColumns(15);
 
@@ -95,7 +95,6 @@ public class DbTableImportDialog extends DialogWrapper {
                 try {
                     List<String[]> tables = get();
                     tableModel.setData(tables);
-                    Messages.showInfoMessage("共加载 " + tables.size() + " 张表", "加载完成");
                 } catch (Exception ex) {
                     Messages.showErrorDialog("加载表列表失败: " + ex.getMessage(), "错误");
                 }
@@ -116,12 +115,7 @@ public class DbTableImportDialog extends DialogWrapper {
                 mi.setTableName(tableName);
                 mi.setModelDesc(remark);
 
-                String modelName = tableName;
-                if (!prefix.isEmpty() && modelName.startsWith(prefix)) {
-                    modelName = modelName.substring(prefix.length());
-                    if (modelName.startsWith("_")) modelName = modelName.substring(1);
-                }
-                mi.setModelName(StringUtil.upperFirstChar(StringUtil.underlineToCamel(modelName)));
+                mi.setModelName(GeneratorUtil.buildModelNameFromTable(tableName, prefix));
                 mi.setIdType("String");
                 mi.setOnlyRepository(false);
                 mi.setCreateController(true);

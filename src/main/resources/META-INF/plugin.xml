@@ -1,28 +1,27 @@
 <idea-plugin url="https://easybuild.pro/docs/reader">
     <id>com.mcst.easyfk.generator.idea</id>
     <name>EasyFK Generator</name>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
     <vendor email="jack_java@aliyun.com" url="https://easybuild.pro">易构 EasyBuild</vendor>
 
     <description><![CDATA[
         <h2>EasyFK Generator</h2>
         <p>EasyFK Generator helps you generate project structure, model code, business layers, and configuration inside IntelliJ IDEA.</p>
-        <p>EasyFK Generator 是面向 Java / Spring Boot 技术体系的 IDEA 代码生成插件，可直接在 IntelliJ IDEA 中完成项目初始化、模型生成、业务代码生成与自动装配配置生成。</p>
-        <p>它既适合新项目快速搭建，也适合已有项目做增量生成与模型刷新，帮助团队减少重复样板代码，提高交付效率。</p>
+        <p>EasyFK Generator 是一款面向 Java / Spring Boot 技术栈的高效代码生成插件，聚焦“配置驱动 + 数据库感知 + 全栈生成”，可直接在 IntelliJ IDEA 中完成项目骨架搭建、模型生成、业务层代码生成与自动装配配置生成。</p>
+        <p>它不仅能从数据库表一键推导 Entity、Mapper、DTO、Param、Repository、Service、API、Remote、Controller 等核心代码，还支持增量生成、模型刷新、仅 Repository 生成等精细化控制，让新项目启动更快、老项目扩展更稳。</p>
+        <p>插件与 CLI 共用 <code>generator.yml</code> 配置文件，既适合个人在 IDEA 中可视化操作，也适合团队统一配置、统一流程、统一输出结果，显著减少重复样板代码与手工维护成本。</p>
         <p><a href="https://easybuild.pro/docs/reader">使用文档</a></p>
-
-        <h3>核心能力</h3>
-        <ul>
-            <li><b>项目初始化</b>：生成完整的 EasyFK 项目骨架、模块结构与基础配置文件。</li>
+        <h3 style="margin-bottom:4px;">核心能力</h3>
+        <ul style="margin-top:0; margin-bottom:8px; padding-left:18px;">
+            <li><b>项目初始化</b>：生成完整的Java/Spring Boot项目骨架、模块结构与基础配置文件。</li>
             <li><b>模型生成</b>：支持从数据库表或手动定义模型生成 Entity、Mapper、DTO、Param 等代码。</li>
             <li><b>业务代码生成</b>：可一键生成 Repository、Service、API、Remote、Controller 等业务层代码。</li>
             <li><b>增量生成</b>：新增模块或表结构时可继续生成，不影响已有业务代码。</li>
             <li><b>模型刷新</b>：表结构变化后可重新生成模型相关代码，尽量保持手写业务逻辑不受影响。</li>
             <li><b>数据库导入</b>：支持连接数据库并直接导入表名进入生成流程。</li>
         </ul>
-
-        <h3>支持范围</h3>
-        <ul>
+        <h3 style="margin-bottom:4px;">支持范围</h3>
+        <ul style="margin-top:0; margin-bottom:8px; padding-left:18px;">
             <li><b>项目类型</b>：Single / Micro-PRD / Microservice / Smart</li>
             <li><b>构建方式</b>：Maven / Gradle</li>
             <li><b>ORM 框架</b>：MyBatis / MyBatis-Flex / Hibernate</li>
@@ -30,21 +29,30 @@
             <li><b>应用类型</b>：BMS / CLIENT</li>
             <li><b>数据库导入</b>：支持 MySQL / PostgreSQL 及对应生成流程</li>
         </ul>
-
-        <h3>典型场景</h3>
-        <ul>
+        <h3 style="margin-bottom:4px;">典型场景</h3>
+        <ul style="margin-top:0; margin-bottom:8px; padding-left:18px;">
             <li>在 IDEA 中快速创建全新的 EasyFK 项目。</li>
             <li>对已有项目新增表后继续生成模型与业务代码。</li>
             <li>数据库字段变化后刷新 DTO、Param、Entity、Mapper 等模型相关代码。</li>
             <li>通过共享 <code>generator.yml</code> 在 CLI 与 IDEA 插件之间无缝切换使用。</li>
         </ul>
-
         <h3>补充说明</h3>
         <p>插件与 CLI 共用 <code>generator.yml</code> 配置文件，便于团队统一配置、统一流程、统一输出结果。</p>
         <p>如果你希望进一步了解安装、配置和使用方式，可查看上方使用文档链接。</p>
     ]]></description>
 
     <change-notes><![CDATA[
+        <b>1.0.8</b> — 模型确认流程增强与数据库导入体验优化
+        <ul>
+            <li>模型配置页将“从数据库导入 / 手动创建模型”调整为“选择表 / 确认模型”，使数据库选表与模型详细控制形成连续流程</li>
+            <li>切换到“确认模型”时会自动根据当前 <code>db-tables</code> 生成模型列表，并与已有模型配置叠加合并，不再互斥</li>
+            <li>数据库导入的表现在支持直接配置 <code>仅 Repository</code>，可实现某些关系表只生成到 Repository 层，不再继续生成 Service / API / Remote / Controller</li>
+            <li>移除无效的 <code>create-repository</code> 项目级配置，统一以 Model 级别的 <code>only-repository</code> 控制生成范围</li>
+            <li>“表前缀”调整为“忽略表前缀”，支持多个前缀使用英文逗号分隔，插件预览模型名与生成器实际模型名保持一致</li>
+            <li>优化模型配置页数据库连接区域布局，将连接地址、用户名、密码放在同一行，并固定用户名和密码输入框宽度，减少无效空白</li>
+            <li>移除数据库表选择弹窗中无意义的“加载完成”提示框，避免打断选表操作</li>
+        </ul>
+
         <b>1.0.7</b> — 配置文件互通与加载逻辑完善
         <ul>
             <li>插件自动读取项目根目录下的 <code>generator.yml</code>，与 CLI 配置文件保持完全通用</li>

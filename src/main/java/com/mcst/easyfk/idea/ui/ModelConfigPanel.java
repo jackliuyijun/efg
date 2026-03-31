@@ -7,8 +7,8 @@ import com.intellij.ui.ToolbarDecorator;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBTextField;
 import com.intellij.ui.table.JBTable;
-import com.mcst.easyfk.core.utils.common.StringUtil;
 import com.mcst.easyfk.generator.enums.DbType;
+import com.mcst.easyfk.generator.util.GeneratorUtil;
 import com.mcst.easyfk.generator.vo.ModelInfo;
 import com.mcst.easyfk.idea.util.IdeaFileUtil;
 
@@ -17,9 +17,11 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import java.awt.*;
 import java.sql.Connection;
-import java.util.LinkedHashSet;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ModelConfigPanel {
@@ -37,6 +39,7 @@ public class ModelConfigPanel {
     private final JButton testConnBtn = new JButton("测试连接");
     private final JBTextField tablePrefixField = new JBTextField();
     private final JBTextField dbTablesField = new JBTextField();
+    private final JTabbedPane modeTabbedPane = new JTabbedPane();
 
     private JPanel dbConnPanel;
     private JPanel dbImportPanel;
@@ -50,6 +53,7 @@ public class ModelConfigPanel {
 
     public ModelConfigPanel() {
         dbShortUrlField.getEmptyText().setText("localhost:3306/my_database");
+        tablePrefixField.getEmptyText().setText("多个前缀用英文逗号隔开");
         dbTablesField.getEmptyText().setText("留空则导入时显示全部表，多个用逗号分隔");
         testConnBtn.addActionListener(e -> testConnection());
 
@@ -75,9 +79,13 @@ public class ModelConfigPanel {
         dbImportPanel = buildDbImportPanel();
         modelPanel = buildModelPanel();
 
-        JTabbedPane modeTabbedPane = new JTabbedPane();
-        modeTabbedPane.addTab("从数据库导入", dbImportPanel);
-        modeTabbedPane.addTab("手动创建模型", modelPanel);
+        modeTabbedPane.addTab("选择表", dbImportPanel);
+        modeTabbedPane.addTab("确认模型", modelPanel);
+        modeTabbedPane.addChangeListener(e -> {
+            if (modeTabbedPane.getSelectedIndex() == 1) {
+                syncModelsFromTables();
+            }
+        });
 
         mainPanel = new JPanel(new BorderLayout(0, 4));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0));
@@ -90,6 +98,14 @@ public class ModelConfigPanel {
         panel.setBorder(BorderFactory.createTitledBorder(
                 BorderFactory.createEtchedBorder(), "数据库连接",
                 TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION));
+        Dimension userFieldSize = new Dimension(120, dbUserField.getPreferredSize().height);
+        dbUserField.setPreferredSize(userFieldSize);
+        dbUserField.setMinimumSize(userFieldSize);
+        dbUserField.setMaximumSize(userFieldSize);
+        Dimension pwdFieldSize = new Dimension(120, dbPwdField.getPreferredSize().height);
+        dbPwdField.setPreferredSize(pwdFieldSize);
+        dbPwdField.setMinimumSize(pwdFieldSize);
+        dbPwdField.setMaximumSize(pwdFieldSize);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(7, 6, 7, 6);
@@ -98,32 +114,41 @@ public class ModelConfigPanel {
 
         gbc.gridy = row; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
         panel.add(new JBLabel("数据库类型:"), gbc);
-        JPanel dbTypeRow = new JPanel(new BorderLayout(6, 0));
-        dbTypeRow.add(dbTypeCombo, BorderLayout.CENTER);
-        JPanel testConnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        testConnPanel.add(testConnBtn);
-        dbTypeRow.add(testConnPanel, BorderLayout.EAST);
-        gbc.gridx = 1; gbc.gridwidth = 3; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(dbTypeRow, gbc);
-        gbc.gridwidth = 1;
+        gbc.gridx = 1; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(dbTypeCombo, gbc);
+        gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
+        panel.add(testConnBtn, gbc);
         row++;
 
         gbc.gridy = row; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
         panel.add(new JBLabel("连接地址:"), gbc);
-        gbc.gridx = 1; gbc.gridwidth = 3; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(dbShortUrlField, gbc);
-        gbc.gridwidth = 1;
-        row++;
-
-        gbc.gridy = row; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
-        panel.add(new JBLabel("用户名:"), gbc);
-        gbc.gridx = 1; gbc.weightx = 0.5; gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(dbUserField, gbc);
-        gbc.gridx = 2; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
-        panel.add(new JBLabel("密码:"), gbc);
-        gbc.gridx = 3; gbc.weightx = 0.5; gbc.fill = GridBagConstraints.HORIZONTAL;
-        panel.add(dbPwdField, gbc);
-        row++;
+        JPanel connRow = new JPanel(new GridBagLayout());
+        GridBagConstraints rowGbc = new GridBagConstraints();
+        rowGbc.insets = new Insets(0, 0, 0, 6);
+        rowGbc.gridy = 0;
+        rowGbc.gridx = 0;
+        rowGbc.weightx = 1.0;
+        rowGbc.fill = GridBagConstraints.HORIZONTAL;
+        connRow.add(dbShortUrlField, rowGbc);
+        rowGbc.gridx = 1;
+        rowGbc.weightx = 0;
+        rowGbc.fill = GridBagConstraints.NONE;
+        connRow.add(new JBLabel("用户名:"), rowGbc);
+        rowGbc.gridx = 2;
+        rowGbc.weightx = 0;
+        rowGbc.fill = GridBagConstraints.NONE;
+        connRow.add(dbUserField, rowGbc);
+        rowGbc.gridx = 3;
+        rowGbc.weightx = 0;
+        rowGbc.fill = GridBagConstraints.NONE;
+        connRow.add(new JBLabel("密码:"), rowGbc);
+        rowGbc.gridx = 4;
+        rowGbc.weightx = 0;
+        rowGbc.fill = GridBagConstraints.NONE;
+        rowGbc.insets = new Insets(0, 0, 0, 0);
+        connRow.add(dbPwdField, rowGbc);
+        gbc.gridx = 1; gbc.gridwidth = 2; gbc.weightx = 1.0; gbc.fill = GridBagConstraints.HORIZONTAL;
+        panel.add(connRow, gbc);
 
         return panel;
     }
@@ -136,7 +161,7 @@ public class ModelConfigPanel {
         gbc.anchor = GridBagConstraints.WEST;
 
         gbc.gridy = 0; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
-        panel.add(new JBLabel("表前缀:"), gbc);
+        panel.add(new JBLabel("忽略表前缀:"), gbc);
         JPanel prefixRow = new JPanel(new BorderLayout(6, 0));
         prefixRow.add(tablePrefixField, BorderLayout.CENTER);
         JButton clearTablesBtn = new JButton("清空表名");
@@ -147,7 +172,7 @@ public class ModelConfigPanel {
 
         gbc.gridy = 1; gbc.gridx = 0; gbc.weightx = 0; gbc.fill = GridBagConstraints.NONE;
         panel.add(new JBLabel("指定表名:"), gbc);
-        JButton importTablesBtn = new JButton("从数据库导入表...");
+        JButton importTablesBtn = new JButton("从数据库选择表...");
         importTablesBtn.addActionListener(e -> importTablesFromDb());
         JPanel tableRow = new JPanel(new BorderLayout(6, 0));
         tableRow.add(dbTablesField, BorderLayout.CENTER);
@@ -248,7 +273,7 @@ public class ModelConfigPanel {
     }
 
     public List<ModelInfo> getModelList() {
-        return tableModel.getData();
+        return filterModelList(parseDbTables(getDbTables()), tableModel.getData());
     }
 
     public JPanel getPanel() {
@@ -318,23 +343,16 @@ public class ModelConfigPanel {
                 return "使用 db-tables 时，数据库密码不能为空";
             }
         }
-        List<ModelInfo> modelList = getModelList();
+        List<ModelInfo> modelList = buildMergedModelList(parseDbTables(dbTables), getModelList());
         if (requireModelSource && dbTables.isEmpty() && modelList.isEmpty()) {
             return "db-tables 和模型列表不能同时为空";
         }
         Set<String> modelNames = new LinkedHashSet<>();
-        List<String> tables = parseDbTables(dbTables);
-        for (String table : tables) {
-            String modelName = buildModelName(table);
-            if (!modelNames.add(modelName)) {
-                return "Model 名称重复: " + modelName;
-            }
-        }
         for (int i = 0; i < modelList.size(); i++) {
             ModelInfo modelInfo = modelList.get(i);
             String modelName = modelInfo.getModelName() != null ? modelInfo.getModelName().trim() : "";
             if (modelName.isEmpty()) {
-                return "手动模型第 " + (i + 1) + " 行的 Model 名称不能为空";
+                return "确认模型第 " + (i + 1) + " 行的 Model 名称不能为空";
             }
             if (!modelNames.add(modelName)) {
                 return "Model 名称重复: " + modelName;
@@ -392,16 +410,86 @@ public class ModelConfigPanel {
         return tables;
     }
 
-    private String buildModelName(String tableName) {
-        String modelName = tableName;
-        String prefix = getTablePrefix();
-        if (!prefix.isEmpty() && modelName.startsWith(prefix)) {
-            modelName = modelName.substring(prefix.length());
-            if (modelName.startsWith("_")) {
-                modelName = modelName.substring(1);
+    private void syncModelsFromTables() {
+        tableModel.setData(buildMergedModelList(parseDbTables(getDbTables()), tableModel.getData()));
+    }
+
+    private List<ModelInfo> filterModelList(List<String> tables, List<ModelInfo> existingModels) {
+        Set<String> tableSet = new LinkedHashSet<>(tables);
+        List<ModelInfo> filteredModels = new ArrayList<>();
+        for (ModelInfo existingModel : existingModels) {
+            String tableName = existingModel.getTableName() != null ? existingModel.getTableName().trim() : "";
+            if (tableName.isEmpty() || tableSet.contains(tableName)) {
+                filteredModels.add(copyModelInfo(existingModel));
             }
         }
-        return StringUtil.upperFirstChar(StringUtil.underlineToCamel(modelName));
+        return filteredModels;
+    }
+
+    private List<ModelInfo> buildMergedModelList(List<String> tables, List<ModelInfo> existingModels) {
+        Map<String, ModelInfo> existingModelMap = new LinkedHashMap<>();
+        List<ModelInfo> manualModels = new ArrayList<>();
+        for (ModelInfo existingModel : filterModelList(tables, existingModels)) {
+            String tableName = existingModel.getTableName() != null ? existingModel.getTableName().trim() : "";
+            if (!tableName.isEmpty()) {
+                existingModelMap.put(tableName, copyModelInfo(existingModel));
+            } else {
+                manualModels.add(copyModelInfo(existingModel));
+            }
+        }
+        List<ModelInfo> mergedModels = new ArrayList<>();
+        for (String table : tables) {
+            ModelInfo modelInfo = existingModelMap.get(table);
+            if (modelInfo == null) {
+                modelInfo = createDefaultModelInfo(table);
+            } else {
+                if (modelInfo.getModelName() == null || modelInfo.getModelName().isBlank()) {
+                    modelInfo.setModelName(buildModelName(table));
+                }
+                modelInfo.setTableName(table);
+            }
+            mergedModels.add(modelInfo);
+        }
+        mergedModels.addAll(manualModels);
+        return mergedModels;
+    }
+
+    private ModelInfo createDefaultModelInfo(String tableName) {
+        ModelInfo modelInfo = new ModelInfo();
+        modelInfo.setTableName(tableName);
+        modelInfo.setModelName(buildModelName(tableName));
+        modelInfo.setIdType("String");
+        modelInfo.setOnlyRepository(false);
+        modelInfo.setCreateController(true);
+        return modelInfo;
+    }
+
+    private ModelInfo copyModelInfo(ModelInfo source) {
+        ModelInfo modelInfo = new ModelInfo();
+        modelInfo.setModelName(source.getModelName());
+        modelInfo.setTableName(source.getTableName());
+        modelInfo.setModelDesc(source.getModelDesc());
+        modelInfo.setSuperClass(source.getSuperClass());
+        modelInfo.setIdType(source.getIdType());
+        modelInfo.setIdIsAuto(source.getIdIsAuto());
+        modelInfo.setOnlyRepository(source.getOnlyRepository());
+        modelInfo.setFieldList(source.getFieldList());
+        modelInfo.setBasicPackages(source.getBasicPackages());
+        modelInfo.setOtherPackages(source.getOtherPackages());
+        modelInfo.setForbiddenFiled(source.getForbiddenFiled());
+        modelInfo.setResourceGroup(source.getResourceGroup());
+        modelInfo.setResourceName(source.getResourceName());
+        modelInfo.setResourceId(source.getResourceId());
+        modelInfo.setResourcePath(source.getResourcePath());
+        modelInfo.setResourceSort(source.getResourceSort());
+        modelInfo.setModelResourceSort(source.getModelResourceSort());
+        modelInfo.setTablePrefix(source.getTablePrefix());
+        modelInfo.setCreateController(source.getCreateController());
+        return modelInfo;
+    }
+
+    private String buildModelName(String tableName) {
+        return GeneratorUtil.buildModelNameFromTable(tableName, getTablePrefix());
     }
 
     private static class ModelTableModel extends AbstractTableModel {

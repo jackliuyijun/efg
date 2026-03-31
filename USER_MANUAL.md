@@ -1,6 +1,6 @@
 # EasyFK Generator IDEA 插件使用手册
 
-> **版本**: 1.0.0  
+> **版本**: 1.0.8  
 > **适用平台**: IntelliJ IDEA 2024.3+  
 > **JDK 要求**: Java 21  
 > **框架版本**: EasyFK 3.2.12
@@ -53,7 +53,7 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
 - **支持多种项目架构**：Single（单体）、Microservice（微服务）、Smart（多栈微服务）
 - **支持多种构建工具**：Maven、Gradle（Groovy DSL / Kotlin DSL）
 - **支持多种 ORM 框架**：MyBatis、MyBatis-Flex、Hibernate
-- **支持从数据库导入表结构**：MySQL、PostgreSQL、Oracle
+- **支持从数据库导入表结构**：MySQL、PostgreSQL
 
 ---
 
@@ -191,22 +191,22 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
 
 ### 5.2 模型配置
 
-模型配置页签用于定义数据模型（Entity），支持两种创建方式。
+模型配置页签用于定义数据模型（Entity），当前采用“选择表 + 确认模型”的两步式流程。
 
-**创建方式选择**
+**页面结构**
 
-- **从数据库导入**（默认）：连接数据库自动读取表结构
-- **手动创建模型**：在模型列表中手动添加和编辑
+- **选择表**：连接数据库并选择参与生成的表，写入 `db-tables`
+- **确认模型**：查看并调整最终模型列表，可继续手动新增模型，也可对数据库表对应的模型做精细控制
 
-**数据库连接面板**（从数据库导入时显示）
+**数据库连接面板**
 
 | 字段 | 说明 | 示例 |
 |------|------|------|
-| 数据库类型 | MySQL / PostgreSQL / Oracle / Oracle 12c | `MySQL` |
+| 数据库类型 | MySQL / PostgreSQL | `MySQL` |
 | 连接地址 | 数据库的 `host:port/database` 格式 | `localhost:3306/my_database` |
 | 用户名 | 数据库用户名 | `root` |
 | 密码 | 数据库密码 | |
-| 表前缀 | 自动去除的表名前缀 | `t_` |
+| 忽略表前缀 | 自动去除的表名前缀，支持多个前缀使用英文逗号分隔 | `t_,base_` |
 | 指定表名 | 限定导入的表名，多个用逗号分隔；留空则显示全部 | `t_user,t_order` |
 
 > 填写连接信息后可点击 **"测试连接"** 验证数据库是否可达。
@@ -222,7 +222,9 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
 | 仅 Repository | 是否只生成 Repository，不生成 Service 等 | 是 |
 | 生成 Controller | 是否生成 Controller 层 | 是 |
 
-可通过工具栏的 `+` / `-` 按钮手动添加或删除模型行。
+切换到“确认模型”时，会自动根据当前 `db-tables` 生成模型列表；数据库表对应的模型与手工模型会叠加保留。
+
+可通过工具栏的 `+` / `-` 按钮继续手动添加或删除模型行。
 
 ### 5.3 代码配置
 
@@ -305,7 +307,7 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
 **适用场景**: 已有项目中新增了数据库表，需要为新表生成完整的模型和业务代码。
 
 **操作流程**:
-1. 在模型配置页签中导入或手动添加新的表/模型
+1. 在模型配置页签中先选择表，再到“确认模型”中调整或补充模型
 2. 填写代码配置中的模块名称
 3. 点击 "生成模型" 和 "生成业务代码"
 
@@ -350,12 +352,10 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
 |-----------|----------|-------------|
 | MySQL | `com.mysql.cj.jdbc.Driver` | `host:port/database` |
 | PostgreSQL | `org.postgresql.Driver` | `host:port/database` |
-| Oracle | `oracle.jdbc.OracleDriver` | `host:port:SID` 或 `host:port/service` |
-| Oracle 12c | `oracle.jdbc.OracleDriver` | 同 Oracle |
 
 ### 7.2 连接配置
 
-1. 在模型配置页签中选择"从数据库导入"
+1. 在模型配置页签中选择“选择表”
 2. 选择数据库类型
 3. 填写连接地址（只需 `host:port/database` 部分，插件会自动拼接完整 JDBC URL）
 4. 输入用户名和密码
@@ -363,14 +363,15 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
 
 ### 7.3 导入表结构
 
-1. 完成数据库连接配置后，点击 **"从数据库导入表..."**
+1. 完成数据库连接配置后，点击 **"从数据库选择表..."**
 2. 在弹出的导入对话框中：
    - 查看数据库中所有表的列表（含表名和备注）
-   - 可修改"表前缀"用于自动去除前缀并生成 Model 名称
+    - 可修改“忽略表前缀”用于自动去除前缀并生成 Model 名称，支持多个前缀使用英文逗号分隔
    - 勾选需要导入的表
-3. 点击 **"导入选中"**，选中的表将写入 `db-tables` 列表，用于后续从数据库读取字段信息
+3. 点击 **"确认选择"**，选中的表将写入 `db-tables` 列表，用于后续从数据库读取字段信息
+4. 切换到“确认模型”，系统会自动生成对应模型列表，可继续配置 `仅 Repository`、`生成 Controller` 等选项
 
-> **表前缀处理示例**: 若表前缀为 `t_`，表名 `t_user_order` 将自动生成 Model 名称 `UserOrder`。
+> **忽略表前缀处理示例**: 若配置 `t_,base_`，表名 `t_user_order` 将自动生成 Model 名称 `UserOrder`，表名 `base_product` 将自动生成 Model 名称 `Product`。
 
 ---
 
@@ -405,7 +406,7 @@ easyfk:
         db-short-url: localhost:3306/my_database
         db-user: root
         db-pwd: your_password
-        table-prefix: t_
+        table-prefix: t_,base_
         db-tables: t_user,t_order
         model-list:
           - model-name: CustomManualModel
@@ -474,7 +475,7 @@ A: Generate 菜单下的操作需要在已有项目上下文中使用。确保�
 A: 请检查：①连接地址格式是否正确（无需 `jdbc:` 前缀）；②数据库服务是否正常运行；③用户名密码是否正确；④如果是远程数据库，检查防火墙和网络连接。
 
 **Q: 导入的 Model 名称不符合预期？**  
-A: 检查"表前缀"设置是否正确。导入后也可以直接在模型列表中双击编辑 Model 名称。
+A: 检查“忽略表前缀”设置是否正确。导入后也可以直接在“确认模型”中编辑 Model 名称。
 
 **Q: 生成的代码覆盖了我的手动修改？**  
 A: Entity、Mapper、DTO、Param 等是可重复生成的代码，每次刷新会覆盖。如需自定义逻辑，请在 Service 等业务层代码中编写，业务层代码只在首次生成时创建，不会被覆盖。
