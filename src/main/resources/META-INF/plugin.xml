@@ -6,6 +6,7 @@
 
     <description><![CDATA[
         <h2>EasyFK Generator</h2>
+        <p>EasyFK Generator helps you generate project structure, model code, business layers, and configuration inside IntelliJ IDEA.</p>
         <p>EasyFK Generator 是面向 Java / Spring Boot 技术体系的 IDEA 代码生成插件，可直接在 IntelliJ IDEA 中完成项目初始化、模型生成、业务代码生成与自动装配配置生成。</p>
         <p>它既适合新项目快速搭建，也适合已有项目做增量生成与模型刷新，帮助团队减少重复样板代码，提高交付效率。</p>
         <p><a href="https://easybuild.pro/docs/reader">使用文档</a></p>
