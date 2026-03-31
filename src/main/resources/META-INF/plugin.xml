@@ -1,36 +1,59 @@
-<idea-plugin>
+<idea-plugin url="https://easybuild.pro/docs/reader">
     <id>com.mcst.easyfk.generator.idea</id>
     <name>EasyFK Generator</name>
-    <version>1.0.6</version>
-    <vendor email="jack_java@aliyun.com" url="https://easybuid.pro">EasyBuild</vendor>
+    <version>1.0.7</version>
+    <vendor email="jack_java@aliyun.com" url="https://easybuild.pro">易构 EasyBuild</vendor>
 
     <description><![CDATA[
         <h2>EasyFK Generator</h2>
-        <p>A powerful code generation plugin for the <b>EasyFK</b> Java/Spring Boot framework.</p>
+        <p>EasyFK Generator 是面向 Java / Spring Boot 技术体系的 IDEA 代码生成插件，可直接在 IntelliJ IDEA 中完成项目初始化、模型生成、业务代码生成与自动装配配置生成。</p>
+        <p>它既适合新项目快速搭建，也适合已有项目做增量生成与模型刷新，帮助团队减少重复样板代码，提高交付效率。</p>
+        <p><a href="https://easybuild.pro/docs/reader">使用文档</a></p>
 
-        <h3>Features</h3>
+        <h3>核心能力</h3>
         <ul>
-            <li><b>Full-stack Generation</b> — Generate complete project skeleton, Entity/Mapper, business code (Repository/Service/API/Controller/Remote), and Spring Boot AutoConfiguration in one click.</li>
-            <li><b>Incremental Generation</b> — Add new modules or tables to existing projects without affecting current code.</li>
-            <li><b>Model Refresh</b> — Re-generate Entity/Mapper/DTO/Param when database columns change, keeping your business logic untouched.</li>
-            <li><b>Database Import</b> — Connect to MySQL, PostgreSQL, or Oracle and import table structures automatically.</li>
+            <li><b>项目初始化</b>：生成完整的 EasyFK 项目骨架、模块结构与基础配置文件。</li>
+            <li><b>模型生成</b>：支持从数据库表或手动定义模型生成 Entity、Mapper、DTO、Param 等代码。</li>
+            <li><b>业务代码生成</b>：可一键生成 Repository、Service、API、Remote、Controller 等业务层代码。</li>
+            <li><b>增量生成</b>：新增模块或表结构时可继续生成，不影响已有业务代码。</li>
+            <li><b>模型刷新</b>：表结构变化后可重新生成模型相关代码，尽量保持手写业务逻辑不受影响。</li>
+            <li><b>数据库导入</b>：支持连接数据库并直接导入表名进入生成流程。</li>
         </ul>
 
-        <h3>Supported Options</h3>
+        <h3>支持范围</h3>
         <ul>
-            <li><b>Project Types:</b> Single / Microservice / Smart (multi-stack microservices)</li>
-            <li><b>Build Tools:</b> Maven / Gradle (Groovy DSL &amp; Kotlin DSL)</li>
-            <li><b>ORM:</b> MyBatis / MyBatis-Flex / Hibernate</li>
-            <li><b>App Types:</b> BMS (backend management) / CLIENT (consumer-facing)</li>
-            <li><b>RPC:</b> OpenFeign / Dubbo</li>
+            <li><b>项目类型</b>：Single / Micro-PRD / Microservice / Smart</li>
+            <li><b>构建方式</b>：Maven / Gradle</li>
+            <li><b>ORM 框架</b>：MyBatis / MyBatis-Flex / Hibernate</li>
+            <li><b>RPC 类型</b>：OpenFeign / Dubbo</li>
+            <li><b>应用类型</b>：BMS / CLIENT</li>
+            <li><b>数据库导入</b>：支持 MySQL / PostgreSQL 及对应生成流程</li>
         </ul>
 
-        <h3>简介</h3>
-        <p>EasyFK 框架代码生成器 IDEA 插件，支持一键生成项目骨架、Entity/Mapper、业务代码、自动装配配置。</p>
-        <p>支持 Single / Microservice / Smart 三种项目架构，Maven / Gradle 构建，MyBatis / MyBatis-Flex / Hibernate ORM。</p>
+        <h3>典型场景</h3>
+        <ul>
+            <li>在 IDEA 中快速创建全新的 EasyFK 项目。</li>
+            <li>对已有项目新增表后继续生成模型与业务代码。</li>
+            <li>数据库字段变化后刷新 DTO、Param、Entity、Mapper 等模型相关代码。</li>
+            <li>通过共享 <code>generator.yml</code> 在 CLI 与 IDEA 插件之间无缝切换使用。</li>
+        </ul>
+
+        <h3>补充说明</h3>
+        <p>插件与 CLI 共用 <code>generator.yml</code> 配置文件，便于团队统一配置、统一流程、统一输出结果。</p>
+        <p>如果你希望进一步了解安装、配置和使用方式，可查看上方使用文档链接。</p>
     ]]></description>
 
     <change-notes><![CDATA[
+        <b>1.0.7</b> — 配置文件互通与加载逻辑完善
+        <ul>
+            <li>插件自动读取项目根目录下的 <code>generator.yml</code>，与 CLI 配置文件保持完全通用</li>
+            <li>保留对旧版 <code>.easyfk-generator.json</code> 的兼容读取，便于历史项目平滑迁移</li>
+            <li>当根目录同时存在 <code>generator.yml</code> 和 <code>.easyfk-generator.json</code> 时，优先读取 <code>generator.yml</code></li>
+            <li>保存插件配置时继续保留 YAML 中插件界面暂未覆盖的其他 CLI 参数，避免覆盖遗漏</li>
+            <li>移除对 CLI 初始化模板的特殊跳过判断，只要 <code>generator.yml</code> 合法即可直接自动加载</li>
+            <li>修复 YAML 写入时的缩进配置问题，避免生成流程出现配置保存报错</li>
+        </ul>
+
         <b>1.0.6</b> — 项目配置体验优化与 Dubbo 提供者配置调整
         <ul>
             <li>插件本地生成配置文件改为 <code>generator.yml</code>，与 CLI 配置文件完全通用，并兼容读取旧版 <code>.easyfk-generator.json</code></li>
