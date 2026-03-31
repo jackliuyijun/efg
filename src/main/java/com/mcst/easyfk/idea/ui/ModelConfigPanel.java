@@ -283,9 +283,10 @@ public class ModelConfigPanel {
         dbTablesField.setText(dbTables != null ? dbTables : "");
     }
 
-    public void loadDbSettings(String dbShortUrl, String dbUser, String tablePrefix) {
+    public void loadDbSettings(String dbShortUrl, String dbUser, String dbPwd, String tablePrefix) {
         if (dbShortUrl != null && !dbShortUrl.isEmpty()) dbShortUrlField.setText(dbShortUrl);
         if (dbUser != null && !dbUser.isEmpty()) dbUserField.setText(dbUser);
+        if (dbPwd != null && !dbPwd.isEmpty()) dbPwdField.setText(dbPwd);
         if (tablePrefix != null && !tablePrefix.isEmpty()) tablePrefixField.setText(tablePrefix);
     }
 

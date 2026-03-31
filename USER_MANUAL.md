@@ -273,7 +273,7 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
 
 | 按钮 | 功能 |
 |------|------|
-| **加载配置...** | 从文件系统选择 `.easyfk-generator.json` 配置文件加载 |
+| **加载配置...** | 从文件系统选择 `generator.yml` / `.yml` / `.yaml` 配置文件加载 |
 | **重置配置** | 将所有配置项恢复为默认值 |
 
 ---
@@ -378,51 +378,44 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
 
 ### 8.1 项目配置文件
 
-插件会在项目根目录自动保存配置文件 **`.easyfk-generator.json`**，包含以下信息：
+插件会在项目根目录自动保存配置文件 **`generator.yml`**，与 CLI 使用同一份 YAML 配置，可直接通用：
 
-```json
-{
-  "project": {
-    "projectName": "my-shop",
-    "groupId": "com.example",
-    "basePackage": "com.example.shop",
-    "projectDir": "D:\\workspace",
-    "frameworkVersion": "3.2.12",
-    "projectVersion": "1.0.0-SNAPSHOT",
-    "projectType": "SINGLE",
-    "buildType": "MAVEN",
-    "ormType": "MYBATIS",
-    "appType": "BMS",
-    "logType": "LOGBACK",
-    "modules": ["user", "order"]
-  },
-  "code": {
-    "moduleName": "user",
-    "author": "eb-jack",
-    "springAnnotation": true,
-    "extendsSupperClass": true,
-    "createResourceAnnotation": false,
-    "modelList": [
-      {
-        "modelName": "CustomManualModel",
-        "modelDesc": "手动模型"
-      }
-    ]
-  },
-  "db": {
-    "dbType": "MYSQL",
-    "dbShortUrl": "localhost:3306/my_database",
-    "dbUser": "root",
-    "tablePrefix": "t_",
-    "dbTables": "t_user,t_order"
-  }
-}
+```yaml
+easyfk:
+  config:
+    generator:
+      project:
+        project-dir: D:\workspace
+        group-id: com.example
+        project-name: my-shop
+        base-package: com.example.shop
+        project-type: single
+        build-type: maven
+        orm-type: mybatis
+        app-type: bms
+        log-type: logback
+        framework-version: 3.2.12
+        project-version: 1.0.0-SNAPSHOT
+      code:
+        module-name: user
+        author: eb-jack
+        spring-annotation: true
+        extends-supper-class: true
+        db-type: mysql
+        db-short-url: localhost:3306/my_database
+        db-user: root
+        db-pwd: your_password
+        table-prefix: t_
+        db-tables: t_user,t_order
+        model-list:
+          - model-name: CustomManualModel
+            model-desc: 手动模型
 ```
 
 ### 8.2 加载与保存
 
-- **自动保存**: 点击对话框的"关闭"按钮，或执行任一生成操作后，配置会自动保存到项目目录
-- **自动加载**: 再次打开对话框时，如果当前 IDEA 项目根目录下存在 `.easyfk-generator.json`，会自动加载配置
+- **自动保存**: 点击对话框的"关闭"按钮，或执行任一生成操作后，配置会自动保存到项目目录下的 `generator.yml`
+- **自动加载**: 再次打开对话框时，如果当前 IDEA 项目根目录下存在 `generator.yml`，会自动加载配置
 - **手动加载**: 点击对话框顶部 **"加载配置..."** 按钮，可从任意位置选择配置文件
 - **全局记忆**: 上次使用的项目目录、GroupId、包路径、数据库连接等信息会持久化到 IDEA 全局设置中，下次新建项目时自动填充
 
@@ -468,7 +461,7 @@ Generate → EasyFK 刷新 DTO/Param
 
 ### 场景五：团队共享配置
 
-将项目根目录下的 `.easyfk-generator.json` 提交到版本控制。团队成员拉取代码后，打开生成器对话框会自动加载配置，确保配置一致。
+将项目根目录下的 `generator.yml` 提交到版本控制。团队成员拉取代码后，打开生成器对话框会自动加载配置，确保配置一致。
 
 ---
 
@@ -489,8 +482,8 @@ A: Entity、Mapper、DTO、Param 等是可重复生成的代码，每次刷新�
 **Q: 如何切换已有项目的 ORM 框架？**  
 A: 在代码配置页签中修改 ORM 类型下拉框即可，但建议在项目初始化时确定 ORM 框架，中途切换可能需要手动处理兼容性问题。
 
-**Q: 配置文件 `.easyfk-generator.json` 应该加入版本控制吗？**  
-A: 推荐加入。该文件不包含敏感信息（数据库密码不保存），可以帮助团队成员保持配置一致。
+**Q: 配置文件 `generator.yml` 应该加入版本控制吗？**  
+A: 如果文件中包含 `db-pwd` 等敏感信息，不建议直接提交；建议改为团队内自行维护本地副本，或在提交前移除敏感配置。若不包含敏感信息，则可以加入版本控制以保持配置一致。
 
 **Q: 支持哪些 IDEA 版本？**  
 A: 支持 IntelliJ IDEA 2024.3 及以上版本（包括 Community 和 Ultimate 版本）。

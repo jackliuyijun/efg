@@ -33,10 +33,12 @@
     <change-notes><![CDATA[
         <b>1.0.6</b> — 项目配置体验优化与 Dubbo 提供者配置调整
         <ul>
+            <li>插件本地生成配置文件改为 <code>generator.yml</code>，与 CLI 配置文件完全通用，并兼容读取旧版 <code>.easyfk-generator.json</code></li>
             <li>项目配置页将“项目类型”改为下拉选择，便于后续继续扩展更多项目类型</li>
             <li>调整项目类型下拉顺序为：单体项目、产品层项目、微服务项目、智能型项目</li>
             <li>将“项目类型”和“构建工具”调整到同一行显示，并适当增大表单行间距，提升界面紧凑度与可读性</li>
             <li>当 ORM、RPC、PRD 选择为 <code>NONE</code> 时，不再写入接口参数与插件配置，避免无效参数传递</li>
+            <li>保存插件配置时会保留 YAML 中插件界面暂未覆盖的其他 CLI 参数，避免覆盖遗漏</li>
             <li>更新 Dubbo Provider 配置模板，改为生成 <code>ServiceConfig&lt;IxxxRemote&gt;</code> Bean，并显式执行 <code>setInterface</code>、<code>setRef</code>、<code>export</code></li>
         </ul>
 

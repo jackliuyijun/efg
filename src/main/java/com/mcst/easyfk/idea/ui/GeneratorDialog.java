@@ -14,7 +14,6 @@ import com.mcst.easyfk.generator.enums.*;
 import com.mcst.easyfk.generator.properties.CodeProperties;
 import com.mcst.easyfk.generator.properties.ProjectProperties;
 import com.mcst.easyfk.generator.vo.ModelInfo;
-import com.mcst.easyfk.idea.config.GeneratorConfig;
 import com.mcst.easyfk.idea.config.GeneratorConfigUtil;
 import com.mcst.easyfk.idea.settings.EasyfkSettings;
 import com.mcst.easyfk.idea.settings.EasyfkSettingsState;
@@ -37,6 +36,7 @@ public class GeneratorDialog extends DialogWrapper {
     private final JTabbedPane tabbedPane;
     private final @Nullable Project ideProject;
     private final List<Action> generateActions = new ArrayList<>();
+    private GeneratorConfigUtil.LoadedConfig currentLoadedConfig;
     private Action genModelAction;
     private Action genConfigAction;
 
@@ -436,7 +436,7 @@ public class GeneratorDialog extends DialogWrapper {
         loadGlobalDefaults();
 
         if (project != null && project.getBasePath() != null) {
-            GeneratorConfig config = GeneratorConfigUtil.load(project.getBasePath());
+            GeneratorConfigUtil.LoadedConfig config = GeneratorConfigUtil.load(project.getBasePath());
             if (config != null) {
                 applyConfig(config);
             }
@@ -444,6 +444,7 @@ public class GeneratorDialog extends DialogWrapper {
     }
 
     private void loadGlobalDefaults() {
+        currentLoadedConfig = null;
         EasyfkSettings s = EasyfkSettingsState.getInstance().getState();
         if (s == null) return;
 
@@ -462,51 +463,23 @@ public class GeneratorDialog extends DialogWrapper {
         if (!s.lastModuleName.isEmpty()) cp.setModuleName(s.lastModuleName);
         codeConfigPanel.loadFrom(cp);
 
-        modelConfigPanel.loadDbSettings(s.lastDbShortUrl, s.lastDbUser, s.lastTablePrefix);
+        modelConfigPanel.loadDbSettings(s.lastDbShortUrl, s.lastDbUser, null, s.lastTablePrefix);
     }
 
-    private void applyConfig(GeneratorConfig config) {
-        if (config.getProject() != null) {
-            GeneratorConfig.ProjectConfig pc = config.getProject();
-            ProjectProperties pp = new ProjectProperties();
-            pp.setProjectName(pc.getProjectName());
-            pp.setGroupId(pc.getGroupId());
-            pp.setBasePackage(pc.getBasePackage());
-            pp.setProjectDir(pc.getProjectDir());
-            pp.setFrameworkVersion(pc.getFrameworkVersion());
-            pp.setProjectVersion(pc.getProjectVersion());
-            pp.setProjectType(safeEnum(ProjectType.class, pc.getProjectType()));
-            pp.setBuildType(safeEnum(BuildType.class, pc.getBuildType()));
-            pp.setGradleType(safeEnum(GradleType.class, pc.getGradleType()));
-            pp.setOrmType(safeEnum(OrmType.class, pc.getOrmType()));
-            pp.setRpcType(safeEnum(RpcType.class, pc.getRpcType()));
-            pp.setPrdType(safeEnum(PrdType.class, pc.getPrdType()));
-            pp.setAppType(safeEnum(AppType.class, pc.getAppType()));
-            pp.setLogType(safeEnum(LogType.class, pc.getLogType()));
-            if (pc.getIncludeAuth() != null) {
-                pp.setIncludeAuth(pc.getIncludeAuth());
-            }
+    private void applyConfig(GeneratorConfigUtil.LoadedConfig config) {
+        currentLoadedConfig = config;
+        ProjectProperties pp = config.getProjectProperties();
+        if (pp != null) {
             projectConfigPanel.loadFrom(pp);
         }
 
-        if (config.getCode() != null) {
-            GeneratorConfig.CodeConfig cc = config.getCode();
-            CodeProperties cp = new CodeProperties();
-            cp.setModuleName(cc.getModuleName());
-            cp.setAuthor(cc.getAuthor());
-            if (cc.getSpringAnnotation() != null) cp.setSpringAnnotation(cc.getSpringAnnotation());
-            if (cc.getExtendsSupperClass() != null) cp.setExtendsSupperClass(cc.getExtendsSupperClass());
-            if (cc.getCreateResourceAnnotation() != null) cp.setCreateResourceAnnotation(cc.getCreateResourceAnnotation());
+        CodeProperties cp = config.getCodeProperties();
+        if (cp != null) {
             codeConfigPanel.loadFrom(cp);
-            modelConfigPanel.setModelList(cc.getModelList());
-        }
-
-        if (config.getDb() != null) {
-            GeneratorConfig.DbConfig dc = config.getDb();
-            modelConfigPanel.loadDbSettings(dc.getDbShortUrl(), dc.getDbUser(), dc.getTablePrefix());
-            modelConfigPanel.setDbTables(dc.getDbTables());
-            DbType dbType = safeEnum(DbType.class, dc.getDbType());
-            if (dbType != null) modelConfigPanel.setDbType(dbType);
+            modelConfigPanel.loadDbSettings(cp.getDbShortUrl(), cp.getDbUser(), cp.getDbPwd(), cp.getTablePrefix());
+            modelConfigPanel.setDbTables(cp.getDbTables());
+            if (cp.getDbType() != null) modelConfigPanel.setDbType(cp.getDbType());
+            modelConfigPanel.setModelList(cp.getModelList());
         }
     }
 
@@ -546,51 +519,22 @@ public class GeneratorDialog extends DialogWrapper {
         }
 
         CodeProperties cp = codeConfigPanel.toProperties();
-        GeneratorConfig config = new GeneratorConfig();
+        cp.setDbType(modelConfigPanel.getSelectedDbType());
+        cp.setDbShortUrl(modelConfigPanel.getDbShortUrl());
+        cp.setDbUser(modelConfigPanel.getDbUser());
+        cp.setDbPwd(modelConfigPanel.getDbPwd());
+        cp.setTablePrefix(modelConfigPanel.getTablePrefix());
+        cp.setDbTables(modelConfigPanel.getDbTables());
+        cp.setModelList(modelConfigPanel.getModelList());
 
-        GeneratorConfig.ProjectConfig pc = new GeneratorConfig.ProjectConfig();
-        pc.setProjectName(pp.getProjectName());
-        pc.setGroupId(pp.getGroupId());
-        pc.setBasePackage(pp.getBasePackage());
-        pc.setProjectDir(pp.getProjectDir());
-        pc.setFrameworkVersion(pp.getFrameworkVersion());
-        pc.setProjectVersion(pp.getProjectVersion());
-        if (pp.getProjectType() != null) pc.setProjectType(pp.getProjectType().name());
-        if (pp.getBuildType() != null) pc.setBuildType(pp.getBuildType().name());
-        if (pp.getGradleType() != null) pc.setGradleType(pp.getGradleType().name());
-        if (pp.getOrmType() != null && pp.getOrmType() != OrmType.NONE) pc.setOrmType(pp.getOrmType().name());
-        if (pp.getRpcType() != null && pp.getRpcType() != RpcType.NONE) pc.setRpcType(pp.getRpcType().name());
-        if (pp.getPrdType() != null && pp.getPrdType() != PrdType.NONE) pc.setPrdType(pp.getPrdType().name());
-        if (pp.getAppType() != null) pc.setAppType(pp.getAppType().name());
-        if (pp.getLogType() != null) pc.setLogType(pp.getLogType().name());
-        if (pp.getIncludeAuth() != null) {
-            pc.setIncludeAuth(pp.getIncludeAuth());
-        }
-        config.setProject(pc);
-
-        GeneratorConfig.CodeConfig cc = new GeneratorConfig.CodeConfig();
-        cc.setModuleName(cp.getModuleName());
-        cc.setAuthor(cp.getAuthor());
-        cc.setSpringAnnotation(cp.getSpringAnnotation());
-        cc.setExtendsSupperClass(cp.getExtendsSupperClass());
-        cc.setCreateResourceAnnotation(cp.getCreateResourceAnnotation());
-        cc.setModelList(modelConfigPanel.getModelList());
-        config.setCode(cc);
-
-        GeneratorConfig.DbConfig dc = new GeneratorConfig.DbConfig();
-        dc.setDbType(modelConfigPanel.getSelectedDbType() != null ? modelConfigPanel.getSelectedDbType().name() : null);
-        dc.setDbShortUrl(modelConfigPanel.getDbShortUrl());
-        dc.setDbUser(modelConfigPanel.getDbUser());
-        dc.setTablePrefix(modelConfigPanel.getTablePrefix());
-        dc.setDbTables(modelConfigPanel.getDbTables());
-        config.setDb(dc);
-
-        GeneratorConfigUtil.save(fullProjectPath, config);
+        GeneratorConfigUtil.save(fullProjectPath, pp, cp, currentLoadedConfig != null ? currentLoadedConfig.getRawRoot() : null);
+        currentLoadedConfig = GeneratorConfigUtil.load(fullProjectPath);
     }
 
     // ============ 重置配置 ============
 
     private void doResetConfig() {
+        currentLoadedConfig = null;
         projectConfigPanel.resetToDefaults();
         codeConfigPanel.resetToDefaults();
         modelConfigPanel.resetDbSettings();
@@ -601,9 +545,9 @@ public class GeneratorDialog extends DialogWrapper {
 
     private void doLoadConfigFromFile() {
         FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, false, false)
-                .withFileFilter(file -> GeneratorConfigUtil.CONFIG_FILE_NAME.equals(file.getName()))
+                .withFileFilter(file -> GeneratorConfigUtil.isSupportedConfigFile(file.getName()))
                 .withTitle("选择配置文件")
-                .withDescription("选择 " + GeneratorConfigUtil.CONFIG_FILE_NAME + " 配置文件");
+                .withDescription("选择 YAML 配置文件（如 generator.yml）");
 
         VirtualFile projectRoot = null;
         if (ideProject != null && ideProject.getBasePath() != null) {
@@ -624,7 +568,7 @@ public class GeneratorDialog extends DialogWrapper {
 
         if (files.length == 0) return;
 
-        GeneratorConfig config = GeneratorConfigUtil.loadFromFile(files[0].getPath());
+        GeneratorConfigUtil.LoadedConfig config = GeneratorConfigUtil.loadFromFile(files[0].getPath());
         if (config != null) {
             applyConfig(config);
         } else {
@@ -650,14 +594,4 @@ public class GeneratorDialog extends DialogWrapper {
         return codeConfigPanel.isDtoOnly();
     }
 
-    // ============ 工具方法 ============
-
-    private static <T extends Enum<T>> T safeEnum(Class<T> clazz, String name) {
-        if (name == null || name.isEmpty()) return null;
-        try {
-            return Enum.valueOf(clazz, name);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }
 }
