@@ -37,7 +37,7 @@ dependencies {
 
 tasks {
     wrapper {
-        gradleVersion = "8.14"
+        gradleVersion = "9.6.1"
     }
 
     compileJava {

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.intellij.openapi.diagnostic.Logger;
 import com.mcst.easyfk.generator.cli.CliConfigLoader;
+import com.mcst.easyfk.generator.enums.OrmType;
 import com.mcst.easyfk.generator.properties.CodeProperties;
 import com.mcst.easyfk.generator.properties.ProjectProperties;
 import com.mcst.easyfk.generator.vo.ModelInfo;
@@ -186,6 +187,7 @@ public final class GeneratorConfigUtil {
         putEnumOrRemove(project, "build-type", pp.getBuildType());
         putEnumOrRemove(project, "gradle-type", pp.getGradleType());
         putEnumOrRemove(project, "orm-type", pp.getOrmType());
+        putOrmModulesOrRemove(project, pp.getOrmModules());
         putEnumOrRemove(project, "rpc-type", pp.getRpcType());
         putEnumOrRemove(project, "prd-type", pp.getPrdType());
         putEnumOrRemove(project, "app-type", pp.getAppType());
@@ -233,6 +235,17 @@ public final class GeneratorConfigUtil {
             return;
         }
         map.put(key, value.name().toLowerCase());
+    }
+
+    private static void putOrmModulesOrRemove(Map<String, Object> map, List<OrmType> ormModules) {
+        if (ormModules == null || ormModules.isEmpty()) {
+            map.remove("orm-modules");
+            return;
+        }
+        List<String> names = ormModules.stream()
+                .map(ormType -> ormType.name().toLowerCase())
+                .toList();
+        map.put("orm-modules", names);
     }
 
     private static void putOrRemove(Map<String, Object> map, String key, Object value) {

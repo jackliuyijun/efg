@@ -88,7 +88,8 @@ public class GeneratorDialog extends DialogWrapper {
 
     private void updateConfigActionEnabled() {
         if (genConfigAction != null) {
-            genConfigAction.setEnabled(projectConfigPanel.isSmartProjectType());
+            genConfigAction.setEnabled(projectConfigPanel.isSmartProjectType()
+                    || projectConfigPanel.isSmartOrmProjectType());
         }
     }
 

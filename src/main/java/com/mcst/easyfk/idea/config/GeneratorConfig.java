@@ -3,6 +3,7 @@ package com.mcst.easyfk.idea.config;
 import com.mcst.easyfk.generator.vo.ModelInfo;
 
 import java.util.List;
+import com.mcst.easyfk.generator.enums.OrmType;
 
 public class GeneratorConfig {
 
@@ -28,6 +29,7 @@ public class GeneratorConfig {
         private String buildType;
         private String gradleType;
         private String ormType;
+        private List<OrmType> ormModules;
         private String rpcType;
         private String prdType;
         private String appType;
@@ -54,6 +56,8 @@ public class GeneratorConfig {
         public void setGradleType(String gradleType) { this.gradleType = gradleType; }
         public String getOrmType() { return ormType; }
         public void setOrmType(String ormType) { this.ormType = ormType; }
+        public List<OrmType> getOrmModules() { return ormModules; }
+        public void setOrmModules(List<OrmType> ormModules) { this.ormModules = ormModules; }
         public String getRpcType() { return rpcType; }
         public void setRpcType(String rpcType) { this.rpcType = rpcType; }
         public String getPrdType() { return prdType; }

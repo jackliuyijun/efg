@@ -24,6 +24,7 @@ final class GeneratorConfigMapper {
             pp.setBuildType(safeEnum(BuildType.class, pc.getBuildType()));
             pp.setGradleType(safeEnum(GradleType.class, pc.getGradleType()));
             pp.setOrmType(safeEnum(OrmType.class, pc.getOrmType()));
+            pp.setOrmModules(pc.getOrmModules());
             pp.setRpcType(safeEnum(RpcType.class, pc.getRpcType()));
             pp.setPrdType(safeEnum(PrdType.class, pc.getPrdType()));
             pp.setAppType(safeEnum(AppType.class, pc.getAppType()));

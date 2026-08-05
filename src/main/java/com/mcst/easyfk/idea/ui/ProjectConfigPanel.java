@@ -11,6 +11,8 @@ import com.mcst.easyfk.generator.properties.ProjectProperties;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ItemEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProjectConfigPanel {
 
@@ -27,7 +29,8 @@ public class ProjectConfigPanel {
             ProjectType.SINGLE,
             ProjectType.MICRO_PRD,
             ProjectType.MICROSERVICE,
-            ProjectType.SMART
+            ProjectType.SMART,
+            ProjectType.SMART_ORM
     });
 
     private final JRadioButton mavenRadio = new JRadioButton("Maven");
@@ -39,6 +42,12 @@ public class ProjectConfigPanel {
     private final JBLabel rpcTypeLabel = new JBLabel("RPC 类型:");
     private final ComboBox<PrdType> prdTypeCombo = new ComboBox<>(PrdType.values());
     private final JBLabel prdTypeLabel = new JBLabel("PRD 策略:");
+
+    private final JBLabel ormModulesLabel = new JBLabel("ORM 模块:");
+    private final JPanel ormModulesPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+    private final JCheckBox plusCheck = new JCheckBox("MyBatis-Plus");
+    private final JCheckBox flexCheck = new JCheckBox("MyBatis-Flex");
+    private final JCheckBox hibernateCheck = new JCheckBox("Hibernate");
 
     private final JRadioButton bmsRadio = new JRadioButton("BMS (后台管理端)");
     private final JRadioButton clientRadio = new JRadioButton("CLIENT (C端)");
@@ -76,6 +85,13 @@ public class ProjectConfigPanel {
 
         prdTypeCombo.setSelectedItem(PrdType.NONE);
 
+        plusCheck.setSelected(true);
+        flexCheck.setSelected(true);
+        hibernateCheck.setSelected(true);
+        ormModulesPanel.add(plusCheck);
+        ormModulesPanel.add(flexCheck);
+        ormModulesPanel.add(hibernateCheck);
+
         logTypeGroup.add(logbackRadio);
         logTypeGroup.add(log4j2Radio);
         logbackRadio.setSelected(true);
@@ -109,6 +125,7 @@ public class ProjectConfigPanel {
 
         addTwoColumnRow(row++, "项目类型:", projectTypeCombo, "构建工具:", buildTypePanel);
         addThreeColumnRow(row++, "ORM 框架:", ormTypeCombo, prdTypeLabel, prdTypeCombo, rpcTypeLabel, rpcTypeCombo);
+        addLabeledRow(row++, ormModulesLabel, ormModulesPanel);
         addFullWidthRow(row++, "应用类型 *:", appTypePanel);
         addFullWidthRow(row++, "日志框架:", logTypePanel);
 
@@ -224,7 +241,8 @@ public class ProjectConfigPanel {
             rpcTypeCombo.setSelectedItem(RpcType.CLOUD);
         }
 
-        boolean ormEnabled = !isSelectedProjectType(ProjectType.MICRO_PRD);
+        boolean smartOrm = isSelectedProjectType(ProjectType.SMART_ORM);
+        boolean ormEnabled = !isSelectedProjectType(ProjectType.MICRO_PRD) && !smartOrm;
         ormTypeCombo.setEnabled(ormEnabled);
         if (!ormEnabled) {
             ormTypeCombo.setSelectedItem(OrmType.NONE);
@@ -236,6 +254,9 @@ public class ProjectConfigPanel {
         if (!prdEnabled) {
             prdTypeCombo.setSelectedItem(PrdType.NONE);
         }
+
+        ormModulesLabel.setVisible(smartOrm);
+        ormModulesPanel.setVisible(smartOrm);
 
         updateAppTypeVisibility();
     }
@@ -272,6 +293,10 @@ public class ProjectConfigPanel {
         return isSelectedProjectType(ProjectType.SMART);
     }
 
+    public boolean isSmartOrmProjectType() {
+        return isSelectedProjectType(ProjectType.SMART_ORM);
+    }
+
     public boolean isMicroPrdProjectType() {
         return isSelectedProjectType(ProjectType.MICRO_PRD);
     }
@@ -296,6 +321,15 @@ public class ProjectConfigPanel {
         if (!RpcType.NONE.equals(rpcType)) pp.setRpcType(rpcType);
         PrdType prdType = (PrdType) prdTypeCombo.getSelectedItem();
         if (!PrdType.NONE.equals(prdType)) pp.setPrdType(prdType);
+        if (isSelectedProjectType(ProjectType.SMART_ORM)) {
+            List<OrmType> ormModules = new ArrayList<>();
+            if (plusCheck.isSelected()) ormModules.add(OrmType.MYBATIS);
+            if (flexCheck.isSelected()) ormModules.add(OrmType.MYBATIS_FLEX);
+            if (hibernateCheck.isSelected()) ormModules.add(OrmType.HIBERNATE);
+            if (!ormModules.isEmpty()) {
+                pp.setOrmModules(ormModules);
+            }
+        }
 
         if (bmsRadio.isEnabled()) {
             if (bmsRadio.isSelected()) pp.setAppType(AppType.BMS);
@@ -318,6 +352,10 @@ public class ProjectConfigPanel {
         if (projectDirField.getText().trim().isEmpty()) return "项目目录不能为空";
         if (bmsRadio.isEnabled() && !bmsRadio.isSelected() && !clientRadio.isSelected()) return "请选择应用类型";
         if (isSelectedProjectType(ProjectType.MICRO_PRD) && RpcType.NONE.equals(rpcTypeCombo.getSelectedItem())) return "MICRO_PRD 项目必须选择 RPC 类型（CLOUD 或 DUBBO）";
+        if (isSelectedProjectType(ProjectType.SMART_ORM)
+                && !plusCheck.isSelected() && !flexCheck.isSelected() && !hibernateCheck.isSelected()) {
+            return "SMART_ORM 模式至少需要选择一个 ORM 模块";
+        }
         return null;
     }
 
@@ -337,6 +375,12 @@ public class ProjectConfigPanel {
         if (pp.getOrmType() != null) ormTypeCombo.setSelectedItem(pp.getOrmType());
         if (pp.getRpcType() != null) rpcTypeCombo.setSelectedItem(pp.getRpcType());
         if (pp.getPrdType() != null) prdTypeCombo.setSelectedItem(pp.getPrdType());
+        if (ProjectType.SMART_ORM.equals(pp.getProjectType()) && pp.getOrmModules() != null) {
+            List<OrmType> modules = pp.getOrmModules();
+            plusCheck.setSelected(modules.contains(OrmType.MYBATIS));
+            flexCheck.setSelected(modules.contains(OrmType.MYBATIS_FLEX));
+            hibernateCheck.setSelected(modules.contains(OrmType.HIBERNATE));
+        }
         if (pp.getAppType() != null) {
             if (pp.getAppType() == AppType.BMS) bmsRadio.setSelected(true);
             else clientRadio.setSelected(true);
@@ -366,6 +410,9 @@ public class ProjectConfigPanel {
         ormTypeCombo.setSelectedItem(OrmType.NONE);
         rpcTypeCombo.setSelectedItem(RpcType.NONE);
         prdTypeCombo.setSelectedItem(PrdType.NONE);
+        plusCheck.setSelected(true);
+        flexCheck.setSelected(true);
+        hibernateCheck.setSelected(true);
         bmsRadio.setSelected(true);
         logbackRadio.setSelected(true);
         includeAuthCheckBox.setSelected(false);
@@ -380,6 +427,7 @@ public class ProjectConfigPanel {
             case SINGLE -> "Single (单体项目)";
             case MICROSERVICE -> "Microservice (微服务项目)";
             case SMART -> "Smart (智能型项目)";
+            case SMART_ORM -> "Smart-ORM (智能型+ORM抽离)";
             case MICRO_PRD -> "Micro-PRD (产品层项目)";
             default -> projectType.name();
         };

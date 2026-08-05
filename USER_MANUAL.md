@@ -50,7 +50,7 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
 - **生成 Entity / Mapper**：根据数据库表结构或手动定义的模型，生成 JPA 实体类和数据访问层
 - **生成业务代码**：自动生成 Repository、Service、API、Controller、Remote 等分层业务代码
 - **生成自动装配配置**：生成 Spring Boot AutoConfiguration 配置类
-- **支持多种项目架构**：Single（单体）、Microservice（微服务）、Smart（多栈微服务）
+- **支持多种项目架构**：Single（单体）、Microservice（微服务）、Smart（多栈微服务）、Smart-ORM（多栈微服务 + ORM 抽离）
 - **支持多种构建工具**：Maven、Gradle（Groovy DSL / Kotlin DSL）
 - **支持多种 ORM 框架**：MyBatis、MyBatis-Flex、Hibernate
 - **支持从数据库导入表结构**：MySQL、PostgreSQL
@@ -174,10 +174,11 @@ EasyFK Generator 是一款 IntelliJ IDEA 插件，用于基于 EasyFK 框架快�
 
 | 字段 | 可选值 | 说明 |
 |------|--------|------|
-| 项目类型 | **Single**（单体） / **Microservice**（微服务） / **Smart**（多栈微服务） | 决定项目整体架构 |
+| 项目类型 | **Single**（单体） / **Microservice**（微服务） / **Smart**（多栈微服务） / **Smart-ORM**（多栈微服务 + ORM 抽离） | 决定项目整体架构 |
 | 构建工具 | **Maven** / **Gradle** | 选择 Gradle 时可进一步选择 Groovy 或 Kotlin DSL |
 | Gradle DSL | **Groovy** / **Kotlin** | 仅在选择 Gradle 时显示 |
-| ORM 框架 | **MYBATIS** / **MYBATIS_FLEX** / **HIBERNATE** | 数据库访问框架 |
+| ORM 框架 | **MYBATIS** / **MYBATIS_FLEX** / **HIBERNATE** | 数据库访问框架（Smart-ORM 类型下禁用，改用下方 ORM 模块多选） |
+| ORM 模块 | **MyBatis-Plus** / **MyBatis-Flex** / **Hibernate**（可多选） | 仅 Smart-ORM 类型显示，决定生成哪几套 ORM 实现模块（默认全选） |
 | RPC 类型 | 可选的远程调用类型 | 仅在 Microservice / Smart 类型时显示 |
 | PRD 策略 | **SINGLE** 等 | 部署策略 |
 | 应用类型 * | **BMS**（后台管理端） / **CLIENT**（C端） | 当项目类型为 **Single** / **Micro-PRD**，或 PRD 策略为 **SINGLE** 时必须选择 |
