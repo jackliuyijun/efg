@@ -223,10 +223,10 @@ public class ModelConfigPanel {
                     if (get()) {
                         Messages.showInfoMessage("数据库连接成功", "测试连接");
                     } else {
-                        Messages.showErrorDialog("连接失败: " + errorMsg, "测试连接");
+                        Messages.showErrorDialog("连接失败: " + IdeaFileUtil.sanitizeDbErrorMessage(errorMsg), "测试连接");
                     }
                 } catch (Exception ex) {
-                    Messages.showErrorDialog("连接失败: " + ex.getMessage(), "测试连接");
+                    Messages.showErrorDialog("连接失败: " + IdeaFileUtil.sanitizeDbErrorMessage(ex.getMessage()), "测试连接");
                 }
             }
         };
