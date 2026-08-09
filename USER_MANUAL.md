@@ -1,6 +1,6 @@
 # EasyFK Generator IDEA 插件使用手册
 
-> **版本**: 1.0.8  
+> **版本**: 1.0.9  
 > **适用平台**: IntelliJ IDEA 2024.3+  
 > **JDK 要求**: Java 21  
 > **框架版本**: EasyFK 3.2.12
@@ -39,6 +39,7 @@
   - [8.2 加载与保存](#82-加载与保存)
 - [9. 典型使用场景](#9-典型使用场景)
 - [10. 常见问题](#10-常见问题)
+- [11. 升级说明](#11-升级说明)
 
 ---
 
@@ -492,4 +493,29 @@ A: 支持 IntelliJ IDEA 2024.3 及以上版本（包括 Community 和 Ultimate �
 
 ---
 
-*本手册基于 EasyFK Generator 插件 v1.0.2 编写。如有疑问，请联系 作者本人*
+## 11. 升级说明
+
+### 11.1 从旧版本升级（1.0.8 → 1.0.9）
+
+1. 打开 IntelliJ IDEA，进入 **File → Settings → Plugins**
+2. 点击 ⚙️ → **Install Plugin from Disk...**，选择本版本的插件 ZIP 包
+3. 如已安装旧版本，可直接用新 ZIP 覆盖安装，然后重启 IDE 使插件生效
+
+> 升级不会改动项目根目录下的 `generator.yml`，插件会继续自动读取其中的既有配置；Smart-ORM 新增的 `orm-modules` 仅在生成时按需写入。
+
+### 11.2 本次升级内容
+
+- **新增 Smart-ORM 项目类型**：支持“多栈微服务 + ORM 抽离”架构。选择 Smart-ORM 后，“ORM 框架”单选自动禁用，改为“ORM 模块”多选（MyBatis-Plus / MyBatis-Flex / Hibernate，默认全选），至少需要选择一个 ORM 模块
+- **修复 PostgreSQL 连接错误消息乱码**：插件自动为 PostgreSQL 连接串追加 `characterEncoding=UTF-8&allowEncodingChanges=true`，从根本上避免驱动按错误字符集解码服务端错误消息
+- **优化数据库错误提示**：连接失败与表导入失败时，对话框展示 `SQLState` 和原始错误消息；对可逆乱码会自动尝试修复，仅在消息确实已损坏时附加编码修复建议，不再整段替换为通用提示
+- **构建环境调整**：Gradle wrapper 版本调整为 9.6.1，构建产物由本地 Gradle 环境生成
+
+### 11.3 升级注意事项
+
+- PostgreSQL 乱码的最终修复依赖数据库编码。若数据库本身为 `SQL_ASCII` / GBK 编码，服务端返回的字节无法无损转换为 UTF-8，建议将数据库改为 UTF8 编码（如 `CREATE DATABASE ... WITH ENCODING 'UTF8' TEMPLATE template0;`），否则错误消息中的中文仍可能无法完整显示
+- Smart-ORM 类型下生成的 `orm-modules` 配置与 CLI 完全通用，可在 `generator.yml` 中直接维护
+- 本版本要求 IntelliJ IDEA 2024.3+（build 243）与 Java 21，与 1.0.8 一致
+
+---
+
+*本手册基于 EasyFK Generator 插件 v1.0.9 编写。如有疑问，请联系 作者本人*

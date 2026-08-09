@@ -1,7 +1,7 @@
 <idea-plugin url="https://easybuild.pro/docs/reader">
     <id>com.mcst.easyfk.generator.idea</id>
     <name>EasyFK Generator</name>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <vendor email="jack_java@aliyun.com" url="https://easybuild.pro">易构 EasyBuild</vendor>
 
     <description><![CDATA[
@@ -42,6 +42,15 @@
     ]]></description>
 
     <change-notes><![CDATA[
+        <b>1.0.9</b> — Smart-ORM 支持与数据库连接错误提示优化
+        <ul>
+            <li>新增 <b>Smart-ORM</b> 项目类型（多栈微服务 + ORM 抽离），支持多选 ORM 模块（MyBatis-Plus / MyBatis-Flex / Hibernate），配置写入 <code>generator.yml</code> 的 <code>orm-modules</code>，与 CLI 完全通用</li>
+            <li>Smart-ORM 类型下自动禁用“ORM 框架”单选并显示“ORM 模块”多选，至少需选择一个 ORM 模块</li>
+            <li>修复 PostgreSQL 连接失败时错误消息乱码（U+FFFD）问题：PostgreSQL 连接串自动追加 <code>characterEncoding=UTF-8&amp;allowEncodingChanges=true</code></li>
+            <li>数据库连接错误提示优化：展示 <code>SQLState</code> 与原始错误消息，自动尝试修复可逆乱码；仅当错误消息确实无法解码时才附加编码修复建议，不再整段替换为通用提示</li>
+            <li>数据库表导入失败提示同步优化，展示更具体的错误信息</li>
+        </ul>
+
         <b>1.0.8</b> — 模型确认流程增强与数据库导入体验优化
         <ul>
             <li>模型配置页将“从数据库导入 / 手动创建模型”调整为“选择表 / 确认模型”，使数据库选表与模型详细控制形成连续流程</li>

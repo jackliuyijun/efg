@@ -96,7 +96,7 @@ public class DbTableImportDialog extends DialogWrapper {
                     List<String[]> tables = get();
                     tableModel.setData(tables);
                 } catch (Exception ex) {
-                    Messages.showErrorDialog("加载表列表失败: " + IdeaFileUtil.sanitizeDbErrorMessage(ex.getMessage()), "错误");
+                    Messages.showErrorDialog("加载表列表失败: " + IdeaFileUtil.sanitizeDbErrorMessage(ex), "错误");
                 }
             }
         };

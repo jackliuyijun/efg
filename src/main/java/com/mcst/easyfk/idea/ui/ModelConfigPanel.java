@@ -199,7 +199,7 @@ public class ModelConfigPanel {
         testConnBtn.setText("连接中...");
 
         SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
-            private String errorMsg;
+            private Throwable error;
 
             @Override
             protected Boolean doInBackground() {
@@ -210,7 +210,7 @@ public class ModelConfigPanel {
                     conn.close();
                     return true;
                 } catch (Exception ex) {
-                    errorMsg = ex.getMessage();
+                    error = ex;
                     return false;
                 }
             }
@@ -223,10 +223,10 @@ public class ModelConfigPanel {
                     if (get()) {
                         Messages.showInfoMessage("数据库连接成功", "测试连接");
                     } else {
-                        Messages.showErrorDialog("连接失败: " + IdeaFileUtil.sanitizeDbErrorMessage(errorMsg), "测试连接");
+                        Messages.showErrorDialog("连接失败: " + IdeaFileUtil.sanitizeDbErrorMessage(error), "测试连接");
                     }
                 } catch (Exception ex) {
-                    Messages.showErrorDialog("连接失败: " + IdeaFileUtil.sanitizeDbErrorMessage(ex.getMessage()), "测试连接");
+                    Messages.showErrorDialog("连接失败: " + IdeaFileUtil.sanitizeDbErrorMessage(ex), "测试连接");
                 }
             }
         };
@@ -237,7 +237,9 @@ public class ModelConfigPanel {
         DbType dbType = (DbType) dbTypeCombo.getSelectedItem();
         String shortUrl = dbShortUrlField.getText().trim();
         if (dbType == DbType.POSTGRE_SQL) {
-            return "jdbc:postgresql://" + shortUrl;
+            String url = "jdbc:postgresql://" + shortUrl;
+            return url + (url.contains("?") ? "&" : "?")
+                    + "characterEncoding=UTF-8&allowEncodingChanges=true";
         } else {
             return "jdbc:mysql://" + shortUrl + "?characterEncoding=UTF-8&useSSL=false&useInformationSchema=true&remarks=true&useUnicode=true&allowPublicKeyRetrieval=true";
         }
